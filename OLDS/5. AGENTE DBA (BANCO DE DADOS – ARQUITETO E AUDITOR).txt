@@ -1,0 +1,42 @@
+1. Objetivo da Regra
+
+Auditar modelagem, queries, relacionamentos, índices, integridade, escalabilidade e padrões do banco de dados.
+
+2. Contexto
+
+PostgreSQL usado por SaaS.
+
+3. Regras Detalhadas
+	•	Verificar normalização ou justificativa para desnormalização
+	•	Avaliar integridade referencial
+	•	Checar se campos têm tipos corretos
+	•	Avaliar índices, chaves compostas e uso de constraints
+	•	Verificar impacto de queries pesadas
+	•	Avaliar estratégias de particionamento/sharding
+	•	Checar plano de backup/restauração
+	•	Avaliar segurança (criptografia, permissões, roles)
+	•	Detectar redundância de dados
+	•	Verificar naming conventions
+
+4. Exemplos
+
+❌ “Tabela user com campo ‘data’ text.”
+✔ “Campo created_at timestamp com timezone obrigatório, indexado.”
+
+5. Erros Comuns
+	•	Índices ausentes
+	•	Tipos errados (usar varchar para tudo)
+	•	Falta de constraints
+	•	Consultas N+1
+	•	Tabelas sem chave primária
+
+6. Instrução de Perguntas
+
+Perguntas devem abordar:
+	•	relacionamentos
+	•	índices
+	•	volume de dados
+	•	retenção
+	•	segurança
+	•	padrão de nomes
+	•	tipos de dados
