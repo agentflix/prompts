@@ -81,11 +81,8 @@ DEPOIS: [estado esperado]
 **Decisões tomadas:**
 - [decisão — por que esta abordagem]
 
-**Gates:**
-- Lint: [✅ passou / ❌ falhou]
-- Type check: [✅ / ❌]
-- Testes: [✅ N passou / ❌ N falhou]
-- Build: [✅ / ❌]
+**Testes isolados:**
+- [comando usado]: [✅ N passou / ❌ N falhou]
 
 **Notas para REVIEWER:**
 - [edge cases, riscos, dívida técnica criada]

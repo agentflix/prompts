@@ -100,15 +100,20 @@ Sequência obrigatória:
 
 Se surgir necessidade de pesquisar algo não previsto na task: parar, registrar no BUILDER Log como escopo não coberto, criar nova task para o resto.
 
-### 7. Verificar gates locais
+### 7. Rodar testes isolados
 
-Rodar antes de passar para review:
-- Lint: sem erros
-- Type check: sem erros
-- Testes da task: passando
-- Build: sem quebra
+Rodar apenas os testes dos arquivos modificados nesta task — não a suite completa.
 
-Se qualquer gate falhar: corrigir antes de prosseguir.
+```bash
+# Exemplos — adaptar para a stack real:
+# PHP:  php artisan test --filter NomeDaClasseTest
+# Jest: npx jest path/do/arquivo.test.ts
+# Pytest: pytest tests/path/to/test_file.py
+```
+
+Gates completos (lint, build, suite inteira) são responsabilidade do REVIEWER — não rodar aqui.
+
+Se os testes isolados falharem: corrigir antes de prosseguir.
 
 ### 8. Preencher BUILDER Log no session
 
@@ -116,7 +121,7 @@ Atualizar a subseção **BUILDER Log** na seção `## TASK-X.Y.Z` do session:
 
 - Arquivos modificados com descrição de uma linha cada
 - Decisões tomadas durante a implementação
-- Resultado de cada gate (✅ / ❌)
+- Testes isolados: comando usado + resultado
 - Notas para REVIEWER: edge cases, riscos, dívida técnica
 
 Atualizar cabeçalho da seção:

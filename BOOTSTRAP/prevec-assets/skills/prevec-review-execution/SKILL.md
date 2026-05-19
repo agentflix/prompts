@@ -103,9 +103,15 @@ Passar para cada revisor o **Architecture Snapshot** + **T.A.C.E** do session �
 6. **Rastreabilidade** — diff bate com seção A e critérios E do session
 7. **Meta-review** — revisar o review, remover achados sem prova
 
-### 6. Executar gates
+### 6. Executar gates completos
 
-Rodar gates conforme `.context/WORKFLOW/validation-flow.md` para o workspace alterado.
+Esta é a única fase onde os gates completos rodam — o BUILDER rodou apenas testes isolados.
+
+Rodar todos os gates conforme `.context/WORKFLOW/validation-flow.md` para o workspace alterado:
+- Lint completo
+- Type check
+- Suite de testes completa
+- Build
 
 ### 7. Preencher REVIEWER Log no session
 

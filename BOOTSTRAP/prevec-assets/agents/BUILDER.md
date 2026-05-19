@@ -105,18 +105,17 @@ Stack completa:
 
 ## Gates de Qualidade
 
-Antes de sinalizar task completa, verificar:
+Antes de sinalizar task completa, rodar **apenas os testes isolados** dos arquivos modificados:
 
 ```bash
 # [ADAPTAR PARA COMANDOS REAIS DA STACK DETECTADA]
-# Backend: [comando de lint backend]
-# Backend: [comando de testes backend]
-# Frontend: [comando de lint frontend]
-# Frontend: [comando de build frontend]
-# Frontend: [comando de testes frontend]
+# Backend: [comando de testes filtrado pela classe/módulo da task]
+# Frontend: [comando de testes filtrado pelo arquivo/componente da task]
 ```
 
-Se qualquer gate falhar: corrigir antes de passar para REVIEWER.
+Gates completos (lint, build, suite inteira) são responsabilidade do REVIEWER — não rodar aqui.
+
+Se os testes isolados falharem: corrigir antes de passar para REVIEWER.
 
 ## Integration
 
