@@ -51,9 +51,13 @@ Atualizar seção no session file:
 
 ### 3. CHANGELOG (condicional)
 
-Se o projeto usa CHANGELOG (configurado no bootstrap):
+```bash
+test -d .context/DOCS/CHANGELOG && echo "ativo" || echo "inativo"
+```
 
-Usar diretamente **REVIEWER Log → Para CHANGELOG** do session:
+Se a pasta **não existe**: pular este passo inteiro — não criar arquivo, não registrar nada.
+
+Se existe: usar diretamente **REVIEWER Log → Para CHANGELOG** do session:
 
 ```bash
 # Abrir/criar .context/DOCS/CHANGELOG/[DATA-HOJE].md
@@ -65,11 +69,13 @@ Usar diretamente **REVIEWER Log → Para CHANGELOG** do session:
   - Ref: TASK-X.Y.Z
 ```
 
-Se não usa CHANGELOG: pular.
-
 ### 4. MEMORY (condicional)
 
-Se o projeto usa MEMORY (configurado no bootstrap):
+```bash
+test -d .context/DOCS/MEMORY && echo "ativo" || echo "inativo"
+```
+
+Se a pasta **não existe**: pular este passo inteiro.
 
 Verificar **REVIEWER Log → Para MEMORY** no session:
 - `Há decisão/aprendizado: não` → pular sem registrar entrada vazia

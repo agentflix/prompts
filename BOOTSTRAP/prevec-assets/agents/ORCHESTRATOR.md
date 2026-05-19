@@ -40,8 +40,8 @@ SEMPRE preenche o modelo de contexto antes de delegar.
 3. Nunca executar sem tasks decompostas com T.A.C.E
 4. Tasks com dependência DEVEM respeitar ordem — não paralelizar o que depende
 5. Gates são inegociáveis — REVIEWER reprova → volta para BUILDER
-6. Toda feature concluída gera entrada em CHANGELOG *(se ativo)*
-7. Toda decisão relevante gera entrada em MEMORY *(se ativo)*
+6. Toda feature concluída gera entrada em CHANGELOG — apenas se `test -d .context/DOCS/CHANGELOG`
+7. Toda decisão relevante gera entrada em MEMORY — apenas se `test -d .context/DOCS/MEMORY`
 8. Ao final de toda ação concluída: mostrar o próximo comando com argumentos reais — nunca deixar o usuário sem saber o que digitar em seguida
 
 ## Delegation Map

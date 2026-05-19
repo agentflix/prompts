@@ -75,8 +75,8 @@ Nenhuma task avança para CONFIRM sem aprovação do REVIEWER.
 Executar obrigatoriamente em subagent distinto para não contaminar o contexto:
 
 1. Carregar skill `code-review-confiavel`: ler `[SKILLS_DEST]/code-review-confiavel/SKILL.md`
-2. Executar os 7 revisores conforme `references/reviewers.md`
-3. Rodar gates da stack: `.context/WORKFLOW/validation-flow.md`
+2. Abrir **7 subagents separados — um por revisor** conforme `references/reviewers.md`. Não executar inline. Não reduzir para menos de 7.
+3. Rodar gates completos da stack: `.context/WORKFLOW/validation-flow.md`
 4. Executar second pass: reler diff inteiro e listar o que foi verificado e está limpo
 5. Executar meta-review: descartar achados sem evidência, duplicados, especulativos
 6. Responder com: achados por severidade, gates executados, risco residual
@@ -90,16 +90,22 @@ Executar obrigatoriamente em subagent distinto para não contaminar o contexto:
 1. Marcar task como ✅ no arquivo `.context/DOCS/TASKS/[feature]-tasks.md`
 2. Adicionar evidências na task (output de testes, gates)
 
-**CHANGELOG** *(se ativo)*:
-Abrir/criar `.context/DOCS/CHANGELOG/[DATA].md` e adicionar:
+**CHANGELOG:**
+```bash
+test -d .context/DOCS/CHANGELOG && echo "ativo" || echo "inativo"
+```
+Se pasta não existe: pular. Se existe: abrir/criar `.context/DOCS/CHANGELOG/[DATA].md` e adicionar:
 ```
 - [HH:MM] [TIPO] [[escopo]]: [descrição concisa]
   - Arquivos principais: [lista]
   - Ref: TASK-X.Y.Z / FEAT-NNN
 ```
 
-**MEMORY** *(se ativo)*:
-Perguntar: houve decisão técnica? Armadilha? Padrão novo?
+**MEMORY:**
+```bash
+test -d .context/DOCS/MEMORY && echo "ativo" || echo "inativo"
+```
+Se pasta não existe: pular. Se existe: houve decisão técnica? Armadilha? Padrão novo?
 Se sim → criar `.context/DOCS/MEMORY/[DATA]-[titulo-kebab].md`
 
 **project-state.yaml:**
