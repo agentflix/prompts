@@ -66,10 +66,10 @@ Pergunte ao usuário ANTES de continuar:
 
 1. **CHANGELOG:** Quer usar registro diário de mudanças? (sim/não)
 2. **MEMORY:** Quer usar memória persistente de decisões e aprendizados? (sim/não)
-3. **Skills externas:** Em qual(is) pasta(s) instalar as skills do projeto?
-   - `.claude/skills/`
-   - `.opencode/skills/`
-   - `.codex/skills/`
+3. **Ferramentas ativas:** Quais ferramentas de AI o projeto usa? (determina onde criar symlinks para `.context/agents/` e `.context/skills/`)
+   - `.claude/` (Claude Code)
+   - `.opencode/`
+   - `.codex/`
    - Todas
 
 Registre as respostas. Elas condicionam os passos seguintes.
@@ -81,20 +81,40 @@ Registre as respostas. Elas condicionam os passos seguintes.
 Crie as pastas que ainda não existem. Baseie-se nas pastas detectadas no Passo 0.
 
 ```bash
-# .claude/ — sempre criada
-mkdir -p .claude/agents
-mkdir -p .claude/skills
+# Fonte única de agents e skills — todas as ferramentas apontam aqui via symlink
+mkdir -p .context/agents
+mkdir -p .context/skills
 
-# .codex/ — criar se pasta .codex/ foi detectada ou se usuário escolheu .codex/skills no Passo 0.4
-if [ -d ".codex" ] || [[ "$SKILLS_DEST" == *".codex"* ]]; then
-  mkdir -p .codex/agents
-  mkdir -p .codex/skills
+# .claude/ — sempre criada; agents e skills são symlinks para .context/
+mkdir -p .claude
+if [ -d ".claude/agents" ] && [ ! -L ".claude/agents" ]; then
+  # Cenário C: mover agents existentes para .context/agents antes de symlinkar
+  cp -rn .claude/agents/. .context/agents/ 2>/dev/null || true
+  rm -rf .claude/agents
+fi
+ln -sf ../.context/agents .claude/agents
+ln -sf ../.context/skills .claude/skills
+
+# .codex/ — criar se detectado ou escolhido no Passo 0.4
+if [ -d ".codex" ] || [[ "$TOOLS_ACTIVE" == *".codex"* ]]; then
+  mkdir -p .codex
+  if [ -d ".codex/agents" ] && [ ! -L ".codex/agents" ]; then
+    cp -rn .codex/agents/. .context/agents/ 2>/dev/null || true
+    rm -rf .codex/agents
+  fi
+  ln -sf ../.context/agents .codex/agents
+  ln -sf ../.context/skills .codex/skills
 fi
 
-# .opencode/ — criar se pasta .opencode/ foi detectada ou se usuário escolheu .opencode/skills no Passo 0.4
-if [ -d ".opencode" ] || [[ "$SKILLS_DEST" == *".opencode"* ]]; then
-  mkdir -p .opencode/agents
-  mkdir -p .opencode/skills
+# .opencode/ — criar se detectado ou escolhido no Passo 0.4
+if [ -d ".opencode" ] || [[ "$TOOLS_ACTIVE" == *".opencode"* ]]; then
+  mkdir -p .opencode
+  if [ -d ".opencode/agents" ] && [ ! -L ".opencode/agents" ]; then
+    cp -rn .opencode/agents/. .context/agents/ 2>/dev/null || true
+    rm -rf .opencode/agents
+  fi
+  ln -sf ../.context/agents .opencode/agents
+  ln -sf ../.context/skills .opencode/skills
 fi
 
 # .context/ — sempre criada
@@ -136,7 +156,7 @@ Arquivos a criar em `.context/ARCHITECTURE/`:
 | `architecture.md` | Diagrama Mermaid das camadas reais (bloco ```mermaid``` em markdown) |
 | `modules.yaml` | Definição dos módulos/bounded contexts reais |
 | `modules.md` | Mapa visual das dependências entre módulos (bloco ```mermaid``` em markdown) |
-| `dependencies.yaml` | Regras de dependência entre módulos e camadas |
+| `dependencies.yaml` | Regras de dependência entre módulos e camadas — **apenas regras bloqueantes**, sem comentários ou exemplos. Agents carregam este arquivo inteiro; manter compacto (< 80 linhas) |
 | `project-state.yaml` | Estado atual: stack, métricas, módulos |
 | `project-brain.yaml` | Metadados para IA: identidade, decisões, regras de negócio |
 | `context-version.yaml` | Versionamento dos arquivos de contexto |
@@ -158,7 +178,7 @@ Arquitetura: [ARCHITECTURE] | Camadas: [LAYER_A → LAYER_B → LAYER_C → LAYE
 ## Regras Invioláveis
 1. [regra real do projeto]
 2. [regra real do projeto]
-[N regras — todas do project-brain.yaml]
+[N regras — TODAS as regras de project-brain.yaml sem omitir nenhuma: arquitetura, contratos de performance, idempotência, segurança, convenções obrigatórias]
 
 ## Módulos e Dependências
 | Módulo | Pode importar | Proibido |
@@ -243,12 +263,11 @@ Para cada agent:
 1. Ler o template em `prevec-assets/agents/{NOME}.md`
 2. Ler as "Instruções de preenchimento" no final do template
 3. Substituir todas as variáveis `[VARIAVEL]` por dados reais do Passo 0
-4. Substituir paths de assets por paths instalados (templates usam paths de bootstrap — agents gerados precisam dos paths reais do projeto):
-   - `prevec-assets/brainstorming/SKILL.md` → `[SKILLS_DEST]/brainstorming/SKILL.md`
-   - `prevec-assets/code-review-confiavel/SKILL.md` → `[SKILLS_DEST]/code-review-confiavel/SKILL.md`
-   - `prevec-assets/orchestrator-context-model.md` → `.claude/orchestrator-context-model.md`
-5. Gerar `.claude/agents/{NOME}.md` com o conteúdo final
-6. Verificar: nenhuma variável `[...]` nem path `prevec-assets/` deve permanecer no arquivo gerado
+4. Substituir a variável de path de skills (os templates usam `[SKILLS_DEST]` como placeholder):
+   - `[SKILLS_DEST]` → `.context/skills`
+5. Gerar `.context/agents/{NOME}.md` com o conteúdo final (symlinks em `.claude/agents/`, `.codex/agents/`, `.opencode/agents/` já apontam para esta pasta)
+   > Nota: os templates referenciam `.claude/agents/` em seu cabeçalho — via symlink é equivalente a `.context/agents/`.
+6. Verificar: nenhuma variável `[...]` deve permanecer no arquivo gerado
 
 ---
 
@@ -256,13 +275,22 @@ Para cada agent:
 
 **AGENTS.md é carregado em TODA conversa — deve ter no máximo 100 linhas.**
 Regra: links e referências, nunca conteúdo inline duplicado dos agent files.
-Se ultrapassar 100 linhas: cortar até caber. Detalhes ficam nos arquivos de agent.
+
+Ao finalizar, contar linhas:
+```bash
+wc -l AGENTS.md
+```
+Se > 100: cortar nesta ordem de prioridade (do menos ao mais importante):
+1. Descrições longas na tabela de Architecture → reduzir a 2-3 palavras
+2. Tabela de Architecture → substituir por link único: `> Ver detalhes: .context/ARCHITECTURE/`
+3. Descrições na tabela de Agents → 1 palavra por coluna Absorve
+4. Regras absolutas redundantes com os arquivos de agent → remover
 
 Crie `AGENTS.md` na raiz com dados REAIS. Inclua:
 
 - Identidade do projeto (nome, stack, arquitetura)
-- Regras absolutas (incluindo: "REVIEWER executa `code-review-confiavel` ao final de toda task")
-- Mapa de contexto (`.claude/agents/`, `.claude/skills/`, `.context/ARCHITECTURE/`, `.context/DESIGN/`, `.context/DOCS/`, `.context/WORKFLOW/`)
+- Regras absolutas (incluindo: "REVIEWER executa `code-review-confiavel` ao final de toda task" e "Todo agent mostra o próximo comando com argumentos reais ao final de cada ação concluída")
+- Mapa de contexto (`.context/agents/`, `.context/skills/`, `.context/ARCHITECTURE/`, `.context/DESIGN/`, `.context/DOCS/`, `.context/WORKFLOW/`)
 - Tabela PREVC atualizada (REVIEWER cobre Review + Validation)
 - Seções CHANGELOG e MEMORY (condicionais ao Passo 0.4)
 - Tabela de agents (4 agents consolidados):
@@ -352,23 +380,22 @@ Crie `.context/WORKFLOW/validation-flow.md` com gates REAIS da stack detectada.
 
 ## PASSO 8 — INSTALAR SKILLS EXTERNAS
 
-Copie de `prevec-assets/skills/` para a(s) pasta(s) escolhida(s) no Passo 0.4:
+Skills vão direto para `.context/skills/` — fonte única. Symlinks criados no Passo 1 propagam automaticamente para `.claude/skills/`, `.codex/skills/`, `.opencode/skills/`.
 
 ```bash
-# Para cada pasta escolhida (ex: .claude/skills/):
-cp -r prevec-assets/skills/code-review-confiavel/ [PASTA_ESCOLHIDA]/
-cp -r prevec-assets/skills/brainstorming/ [PASTA_ESCOLHIDA]/
+cp -r prevec-assets/skills/code-review-confiavel/ .context/skills/
+cp -r prevec-assets/skills/brainstorming/ .context/skills/
 ```
 
 Copiar também o modelo de contexto do ORCHESTRATOR e o session model:
 
 ```bash
-cp prevec-assets/orchestrator-context-model.md .claude/orchestrator-context-model.md
+cp prevec-assets/orchestrator-context-model.md .context/orchestrator-context-model.md
 cp prevec-assets/session-model.md .context/.session/_TEMPLATE.md
 cp prevec-assets/planning-session-model.md .context/.session/_PLANNING_TEMPLATE.md
 ```
 
-Confirme ao usuário: "Skills instaladas em [pastas]. orchestrator-context-model.md copiado para .claude/."
+Confirme ao usuário: "Skills instaladas em .context/skills/ (acessíveis via symlinks em todas as ferramentas ativas)."
 
 ---
 
@@ -406,17 +433,16 @@ Criar `.context/DESIGN/README.md` com:
 
 ## PASSO 10 — SKILLS PREVEC
 
-Instalar as 6 skills do workflow PREVEC copiando de `prevec-assets/skills/` para a(s) pasta(s) escolhida(s) no Passo 0.
-
-Para cada pasta de destino selecionada (`.claude/skills/`, `.codex/skills/`, `.opencode/skills/`):
+Instalar as 6 skills do workflow PREVEC em `.context/skills/` — symlinks criados no Passo 1 propagam automaticamente.
 
 ```bash
-cp -r prevec-assets/skills/prevec-new-plan          [destino]/prevec-new-plan
-cp -r prevec-assets/skills/prevec-decompose-plan     [destino]/prevec-decompose-plan
-cp -r prevec-assets/skills/prevec-decompose-task     [destino]/prevec-decompose-task
-cp -r prevec-assets/skills/prevec-execute-task       [destino]/prevec-execute-task
-cp -r prevec-assets/skills/prevec-review-execution   [destino]/prevec-review-execution
-cp -r prevec-assets/skills/prevec-finalize-execution [destino]/prevec-finalize-execution
+cp -r prevec-assets/skills/prevec-new-plan          .context/skills/prevec-new-plan
+cp -r prevec-assets/skills/prevec-decompose-plan     .context/skills/prevec-decompose-plan
+cp -r prevec-assets/skills/prevec-decompose-task     .context/skills/prevec-decompose-task
+cp -r prevec-assets/skills/prevec-execute-task       .context/skills/prevec-execute-task
+cp -r prevec-assets/skills/prevec-review-execution   .context/skills/prevec-review-execution
+cp -r prevec-assets/skills/prevec-finalize-execution .context/skills/prevec-finalize-execution
+cp -r prevec-assets/skills/skill-architect           .context/skills/skill-architect
 ```
 
 | Skill | Fase PREVC | Descrição |
@@ -427,6 +453,7 @@ cp -r prevec-assets/skills/prevec-finalize-execution [destino]/prevec-finalize-e
 | `prevec-execute-task` | Execution | Implementa uma task T.A.C.E específica |
 | `prevec-review-execution` | Validation | 7 revisores em subagent — detecta alucinações e erros |
 | `prevec-finalize-execution` | Confirm | Marca ✅, documenta, commita, PR se feature completa |
+| `skill-architect` | Meta | Cria novas skills seguindo DISCOVERY → CRAFT → VALIDATE |
 
 **Fluxo completo:**
 ```
@@ -448,6 +475,12 @@ if ! grep -q "prevec-assets" .gitignore 2>/dev/null; then
   echo "# Assets do bootstrap AI-First (podem ser commitados se desejado)" >> .gitignore
   echo "# prevec-assets/" >> .gitignore
 fi
+
+if ! grep -q ".context/.session" .gitignore 2>/dev/null; then
+  echo "" >> .gitignore
+  echo "# PREVEC session files — comunicação temporária entre agents" >> .gitignore
+  echo ".context/.session/" >> .gitignore
+fi
 ```
 
 ---
@@ -460,15 +493,21 @@ echo "=== VERIFICAÇÃO FINAL ==="
 echo "Raiz:"
 test -f AGENTS.md && echo "  OK AGENTS.md" || echo "  FALTA AGENTS.md"
 
-echo "Agents:"
+echo "Agents (fonte: .context/agents/):"
 for f in ORCHESTRATOR PLANNER BUILDER REVIEWER; do
-  test -f ".claude/agents/$f.md" && echo "  OK $f.md" || echo "  FALTA $f.md"
+  test -f ".context/agents/$f.md" && echo "  OK $f.md" || echo "  FALTA $f.md"
 done
 
-echo "Skills externas (em pasta escolhida):"
+echo "Symlinks agents:"
+test -L ".claude/agents" && echo "  OK .claude/agents → $(readlink .claude/agents)" || echo "  FALTA symlink .claude/agents"
+
+echo "Skills externas (fonte: .context/skills/):"
 for f in code-review-confiavel brainstorming; do
-  test -d ".claude/skills/$f" && echo "  OK $f" || echo "  VERIFICAR $f"
+  test -d ".context/skills/$f" && echo "  OK $f" || echo "  FALTA $f"
 done
+
+echo "Symlinks skills:"
+test -L ".claude/skills" && echo "  OK .claude/skills → $(readlink .claude/skills)" || echo "  FALTA symlink .claude/skills"
 
 echo "Workflow:"
 test -f ".context/WORKFLOW/PREVC.md" && echo "  OK PREVC.md" || echo "  FALTA PREVC.md"
@@ -479,15 +518,16 @@ for f in architecture.md modules.yaml modules.md dependencies.yaml project-state
   test -f ".context/ARCHITECTURE/$f" && echo "  OK $f" || echo "  FALTA $f"
 done
 
-echo "Skills PREVEC (em pasta escolhida):"
-for f in prevec-new-plan prevec-decompose-plan prevec-decompose-task prevec-execute-task prevec-review-execution prevec-finalize-execution; do
-  test -f ".claude/skills/$f/SKILL.md" && echo "  OK $f/SKILL.md" || echo "  VERIFICAR $f"
+echo "Skills PREVEC (fonte: .context/skills/):"
+for f in prevec-new-plan prevec-decompose-plan prevec-decompose-task prevec-execute-task prevec-review-execution prevec-finalize-execution skill-architect; do
+  test -f ".context/skills/$f/SKILL.md" && echo "  OK $f/SKILL.md" || echo "  FALTA $f"
 done
 
 echo "Assets:"
 test -d "prevec-assets" && echo "  OK prevec-assets/" || echo "  FALTA prevec-assets/"
 test -f "prevec-assets/orchestrator-context-model.md" && echo "  OK orchestrator-context-model.md" || echo "  FALTA orchestrator-context-model.md"
 test -f "prevec-assets/session-model.md" && echo "  OK session-model.md" || echo "  FALTA session-model.md"
+test -f "prevec-assets/planning-session-model.md" && echo "  OK planning-session-model.md" || echo "  FALTA planning-session-model.md"
 
 echo "Design:"
 test -f ".context/DESIGN/_TEMPLATE.md" && echo "  OK _TEMPLATE.md" || echo "  FALTA _TEMPLATE.md"

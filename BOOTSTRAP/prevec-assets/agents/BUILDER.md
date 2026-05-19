@@ -51,6 +51,7 @@ Stack completa:
 5. Todo código novo DEVE ter testes — sem exceção
 6. [CONVENTION — ex: PSR-12 para PHP, Angular Style Guide para TypeScript]
 7. Nunca expor secrets ou dados sensíveis no código
+8. Ao final de toda task implementada: mostrar o próximo comando com argumentos reais — nunca deixar o usuário sem saber o que digitar em seguida
 
 ## Modes
 

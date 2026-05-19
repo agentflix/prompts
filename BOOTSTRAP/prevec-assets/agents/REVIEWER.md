@@ -43,6 +43,7 @@ Nenhuma task avança para CONFIRM sem aprovação do REVIEWER.
 5. Todo achado deve ter: severidade, arquivo+linha, evidência, correção sugerida
 6. Commit só após review aprovado e gates passando
 7. CHANGELOG e MEMORY obrigatórios na fase CONFIRM *(se ativos)*
+8. Ao final de toda ação concluída: mostrar o próximo comando com argumentos reais — nunca deixar o usuário sem saber o que digitar em seguida
 
 ## Modes
 

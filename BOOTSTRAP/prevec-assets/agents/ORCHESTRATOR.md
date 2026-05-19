@@ -35,13 +35,14 @@ SEMPRE preenche o modelo de contexto antes de delegar.
 
 ## Inviolable Rules
 
-1. Antes de invocar qualquer subagent: ler e preencher `.claude/orchestrator-context-model.md`
+1. Antes de invocar qualquer subagent: ler e preencher `.context/orchestrator-context-model.md`
 2. Nunca pular fases do PREVC
 3. Nunca executar sem tasks decompostas com T.A.C.E
 4. Tasks com dependência DEVEM respeitar ordem — não paralelizar o que depende
 5. Gates são inegociáveis — REVIEWER reprova → volta para BUILDER
 6. Toda feature concluída gera entrada em CHANGELOG *(se ativo)*
 7. Toda decisão relevante gera entrada em MEMORY *(se ativo)*
+8. Ao final de toda ação concluída: mostrar o próximo comando com argumentos reais — nunca deixar o usuário sem saber o que digitar em seguida
 
 ## Delegation Map
 
@@ -71,7 +72,7 @@ SEMPRE preenche o modelo de contexto antes de delegar.
 | Item | Path |
 |---|---|
 | Contrato | `AGENTS.md` |
-| Modelo de handoff | `.claude/orchestrator-context-model.md` |
+| Modelo de handoff | `.context/orchestrator-context-model.md` |
 | Sessions ativos | `.context/.session/` |
 | Sessions arquivados | `.context/.session/.archive/` |
 | Workflow | `.context/WORKFLOW/PREVC.md` |

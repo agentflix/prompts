@@ -1,15 +1,15 @@
 ---
 name: prevec-review-execution
-description: Revisa a implementação de uma task no workflow PREVEC usando code-review-confiavel com 7 revisores em subagent distinto. Lê o session file da task para contexto — não re-lê arquivos de origem. Detecta alucinações, quebras de contrato, erros e regressões antes do CONFIRM. Obrigatório após todo prevec-execute-task. Triggers: "revisar task", "review da execução", "prevec-review-execution". Do NOT use para revisar feature docs ou tasks não implementadas (use PLANNER/REVIEWER diretamente).
+description: Revisa a implementação de uma task no workflow PREVEC usando code-review-confiavel com 7 revisores em subagent distinto. Lê a seção da task no session file da feature — não re-lê arquivos de origem. Detecta alucinações, quebras de contrato, erros e regressões antes do CONFIRM. Obrigatório após todo prevec-execute-task. Triggers: "revisar task", "review da execução", "prevec-review-execution". Do NOT use para revisar feature docs ou tasks não implementadas (use PLANNER/REVIEWER diretamente).
 metadata:
   author: prevec
-  version: '1.0.0'
+  version: '2.0.0'
 ---
 
 # prevec-review-execution
 
 Valida a implementação de uma task com 7 revisores especializados antes do CONFIRM.
-Usa o session file como fonte de contexto — zero re-leitura de arquivos de origem.
+Lê a seção da task no session file da feature — zero re-leitura de arquivos de origem.
 
 ## Input
 
@@ -30,8 +30,8 @@ Exemplo: `/prevec-review-execution importacao-csv TASK-3.1.1`
 ## Pré-condições
 
 - Task está 🔄 Em Progresso
-- Session file existe em `.context/.session/[feature]-TASK-X.Y.Z.md` com BUILDER Log preenchido
-- Gates locais passando (confirmado no BUILDER Log)
+- Session file existe em `.context/.session/[feature]-session.md`
+- Seção `## TASK-X.Y.Z` tem BUILDER Log preenchido e gates passando
 
 ## Processo
 
@@ -41,10 +41,12 @@ Este review DEVE ser feito em subagent separado para não contaminar o contexto 
 
 ### 2. Carregar contexto do session file
 
-Ler `.context/.session/[feature]-TASK-X.Y.Z.md` — contém tudo que precisa:
+Ler `.context/.session/[feature]-session.md`.
 
-- **Context Snapshot:** stack, regras invioláveis, T.A.C.E da task, dependências de módulo
-- **BUILDER Log:** arquivos modificados, decisões tomadas, notas para o reviewer
+Localizar a seção `## TASK-X.Y.Z` — contém tudo que precisa:
+- **Architecture Snapshot** (no topo do arquivo): stack, regras invioláveis, dependências de módulo
+- **T.A.C.E da task**: tarefa, arquivos, comportamento, evidências
+- **BUILDER Log**: arquivos modificados, decisões, notas para o reviewer
 
 **NÃO re-ler:** tasks.md, feature.md, project-brain.yaml, architecture.md, dependencies.yaml.
 O session file já tem o contexto serializado.
@@ -76,9 +78,9 @@ Determinar tier:
 
 ### 5. Executar revisores por tier
 
-Abrir subagents conforme `references/reviewers.md` da skill `code-review-confiavel` instalada (`.claude/skills/code-review-confiavel/references/reviewers.md` ou equivalente).
+Abrir subagents conforme `references/reviewers.md` da skill `code-review-confiavel` instalada.
 
-Passar para cada revisor o **Context Snapshot** do session — não o arquivo tasks.md original.
+Passar para cada revisor o **Architecture Snapshot** + **T.A.C.E** do session — não o arquivo tasks.md original.
 
 **Tier FAST (3 revisores):**
 1. **Especialização** — arquitetura e regras do workspace
@@ -107,7 +109,7 @@ Rodar gates conforme `.context/WORKFLOW/validation-flow.md` para o workspace alt
 
 ### 7. Preencher REVIEWER Log no session
 
-Atualizar `.context/.session/[feature]-TASK-X.Y.Z.md` — seção **REVIEWER Log**:
+Atualizar a subseção **REVIEWER Log** na seção `## TASK-X.Y.Z` de `.context/.session/[feature]-session.md`:
 
 - Resultado: aprovado sim/não
 - Contagem de achados por severidade
@@ -117,9 +119,9 @@ Atualizar `.context/.session/[feature]-TASK-X.Y.Z.md` — seção **REVIEWER Log
 
 ### 8. Decisão
 
-**Aprovado:** nenhum achado bloqueante → atualizar `Fase PREVC: CONFIRM` no session → prosseguir
+**Aprovado:** nenhum achado bloqueante → atualizar cabeçalho da seção para `Fase PREVC: CONFIRM` → prosseguir
 
-**Reprovado:** achados bloqueantes → manter `Fase PREVC: EXECUTION` no session → retornar:
+**Reprovado:** achados bloqueantes → manter `Fase PREVC: EXECUTION` → retornar:
 ```
 ❌ Review reprovado — [N] bloqueantes:
 1. [arquivo:linha] [severidade]: [problema]. [correção sugerida]
@@ -134,13 +136,14 @@ Atualizar `.context/.session/[feature]-TASK-X.Y.Z.md` — seção **REVIEWER Log
 📋 Tier: [FAST / STANDARD / FULL] — [N] revisores
 📋 Gates: [lista com resultados]
 📋 Achados: [N bloqueantes=0 | N médios | N baixos]
-📋 Session: atualizado com REVIEWER Log
+📋 Session: .context/.session/[feature]-session.md atualizado
 ➡️  Próximo: /prevec-finalize-execution [feature] TASK-[X.Y.Z]
 ```
 
 ## Error Handling
 
 - Session ausente: rodar prevec-execute-task novamente para recriar
+- Seção TASK-X.Y.Z não encontrada no session: task pode não ter sido iniciada — checar prevec-execute-task
 - Subagent indisponível: fazer review local seguindo os 7 escopos e informar limitação
 - Gate não pode rodar: registrar motivo e risco residual no session — nunca ignorar silenciosamente
 - Achado sem evidência: classificar como pergunta no session, não como bug

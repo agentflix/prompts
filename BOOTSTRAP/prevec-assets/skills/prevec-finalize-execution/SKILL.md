@@ -1,15 +1,15 @@
 ---
 name: prevec-finalize-execution
-description: Finaliza uma task aprovada no workflow PREVEC — lê o session file para dados prontos de CHANGELOG/MEMORY, marca task concluída, cria commit e abre PR se feature completa. Arquiva o session file ao final. Triggers: "finalizar task", "confirmar task", "prevec-finalize-execution". Do NOT use antes do prevec-review-execution aprovar ou para tasks reprovadas.
+description: Finaliza uma task aprovada no workflow PREVEC — lê o session file da feature para dados prontos de CHANGELOG/MEMORY, marca task concluída, cria commit e abre PR se feature completa. Arquiva o session file apenas quando TODAS as tasks da feature forem ✅. Triggers: "finalizar task", "confirmar task", "prevec-finalize-execution". Do NOT use antes do prevec-review-execution aprovar ou para tasks reprovadas.
 metadata:
   author: prevec
-  version: '1.0.0'
+  version: '2.0.0'
 ---
 
 # prevec-finalize-execution
 
 Confirma task aprovada usando dados do session file — zero re-derivação de contexto.
-Arquiva o session ao final do ciclo.
+O session file só é arquivado quando a feature inteira for concluída.
 
 ## Input
 
@@ -21,14 +21,15 @@ Exemplo: `/prevec-finalize-execution importacao-csv TASK-3.1.1`
 
 ## Pré-condições
 
-- Session file existe em `.context/.session/[feature]-TASK-X.Y.Z.md`
-- Session tem `Fase PREVC: CONFIRM` e REVIEWER Log com `Aprovado: sim`
+- Session file existe em `.context/.session/[feature]-session.md`
+- Seção `## TASK-X.Y.Z` tem `Fase PREVC: CONFIRM` e REVIEWER Log com `Resultado: aprovado`
 
 ## Processo
 
 ### 1. Ler session file
 
-Ler `.context/.session/[feature]-TASK-X.Y.Z.md` — contém tudo que precisa:
+Ler `.context/.session/[feature]-session.md`.
+Localizar seção `## TASK-X.Y.Z` — contém tudo que precisa:
 
 - **BUILDER Log:** arquivos modificados (para git add, CHANGELOG)
 - **REVIEWER Log → Para CHANGELOG:** tipo, escopo, descrição prontos
@@ -39,9 +40,14 @@ Ler `.context/.session/[feature]-TASK-X.Y.Z.md` — contém tudo que precisa:
 ### 2. Marcar task como concluída
 
 Em `.context/DOCS/TASKS/[feature]-tasks.md`:
-- `[ ] **TASK-X.Y.Z** ⏳` → `[x] **TASK-X.Y.Z** ✅`
-- `**Status:** ⏳ Pendente` → `**Status:** ✅ Concluída`
+- `[ ] **TASK-X.Y.Z** 🔄` → `[x] **TASK-X.Y.Z** ✅`
+- `**Status:** 🔄 Em Progresso` → `**Status:** ✅ Concluída`
 - Atualizar contador no cabeçalho: `Pendentes: N-1 | Concluídas: N+1`
+
+Atualizar seção no session file:
+```
+> Status: ✅ Concluída | Fase PREVC: CONFIRM
+```
 
 ### 3. CHANGELOG (condicional)
 
@@ -66,8 +72,8 @@ Se não usa CHANGELOG: pular.
 Se o projeto usa MEMORY (configurado no bootstrap):
 
 Verificar **REVIEWER Log → Para MEMORY** no session:
-- `Há decisão/aprendizado relevante: não` → pular sem registrar entrada vazia
-- `Há decisão/aprendizado relevante: sim` → criar entrada:
+- `Há decisão/aprendizado: não` → pular sem registrar entrada vazia
+- `Há decisão/aprendizado: sim` → criar entrada:
 
 ```markdown
 ## [TASK-X.Y.Z] — YYYY-MM-DD
@@ -95,7 +101,16 @@ git add [arquivos do BUILDER Log — apenas seção A da task]
 git commit -m "..."
 ```
 
-### 6. Regenerar context-snapshot (condicional)
+### 6. Preencher Confirmação no session
+
+Atualizar subseção **Confirmação** na seção `## TASK-X.Y.Z`:
+```markdown
+- Confirmada: YYYY-MM-DD HH:MM
+- Commit: [hash]
+- Status: ✅ Concluída
+```
+
+### 7. Regenerar context-snapshot (condicional)
 
 Verificar se algum arquivo de arquitetura foi modificado nesta task:
 
@@ -107,40 +122,40 @@ Se sim → regenerar `.context/ARCHITECTURE/context-snapshot.md` a partir dos ar
 
 Incluir o snapshot regenerado no commit da task.
 
-### 7. Arquivar session file
-
-```bash
-mkdir -p .context/.session/.archive
-mv .context/.session/[feature]-TASK-X.Y.Z.md .context/.session/.archive/[feature]-TASK-X.Y.Z.md
-```
-
-Atualizar campo **Arquivo** no session antes de mover:
-- Confirmada: [data/hora]
-- Commit: [hash curto]
-- Movido para: `.context/.session/.archive/[feature]-TASK-X.Y.Z.md`
-
 ### 8. Verificar se feature está completa
 
 ```bash
 grep -c "⏳ Pendente\|🔄 Em Progresso" .context/DOCS/TASKS/[feature]-tasks.md
 ```
 
-**Se resultado > 0:** feature tem tasks pendentes.
+**Se resultado > 0:** feature tem tasks pendentes → NÃO arquivar session.
 
 ```
 ✅ TASK-X.Y.Z finalizada.
 📋 Feature [feature]: [N] tasks restantes.
+📋 Session: .context/.session/[feature]-session.md (mantido para próximas tasks)
 ➡️  Próxima task: /prevec-execute-task [feature] TASK-[próxima]
 ```
 
-**Se resultado = 0:** todas as tasks concluídas → ir para Passo 8.
+**Se resultado = 0:** todas as tasks concluídas → ir para Passo 9.
 
-### 9. Feature completa — PR
+### 9. Feature completa — Arquivar session e criar PR
 
 Atualizar status em `.context/DOCS/FEATURES/[feature].md`:
 - `Status: 🟡 Em Planning` → `Status: ✅ Concluída`
 
-Criar pull request usando dados agregados dos sessions arquivados:
+Atualizar cabeçalho do session file:
+```markdown
+- Status: ✅ Concluída
+```
+
+Arquivar o session file:
+```bash
+mkdir -p .context/.session/.archive
+mv .context/.session/[feature]-session.md .context/.session/.archive/[feature]-session.md
+```
+
+Criar pull request usando dados agregados das seções do session arquivado:
 
 ```bash
 gh pr create \
@@ -150,7 +165,7 @@ gh pr create \
 [2-3 bullets do que foi implementado]
 
 ## Tasks concluídas
-[lista das TASK-X.Y.Z com descrição de uma linha cada — do REVIEWER Log dos sessions]
+[lista das TASK-X.Y.Z com descrição de uma linha cada — dos REVIEWER Logs das seções]
 
 ## Critérios de Aceite
 [copiar da feature doc — marcar os atendidos com ✅]
@@ -170,7 +185,7 @@ EOF
 📋 Commit: [hash curto]
 📋 CHANGELOG: [atualizado / não configurado]
 📋 MEMORY: [entrada adicionada / sem aprendizado / não configurado]
-📋 Session: arquivado em .context/.session/.archive/
+📋 Session: mantido em .context/.session/[feature]-session.md
 📋 Feature: [N] tasks restantes
 ➡️  Próxima: /prevec-execute-task [feature] TASK-[próxima]
 ```
@@ -183,14 +198,14 @@ EOF
 📋 PR: [URL]
 📋 CHANGELOG: [atualizado / não configurado]
 📋 MEMORY: [N entradas / não configurado]
-📋 Sessions: todos arquivados em .context/.session/.archive/
+📋 Session: arquivado em .context/.session/.archive/[feature]-session.md
 ➡️  Feature entregue. Próxima: /prevec-new-plan [nova ideia]
 ```
 
 ## Error Handling
 
 - Session ausente: checar `.context/.session/.archive/` — pode ter sido arquivado antes. Se não achar, rodar prevec-execute-task novamente
-- Session sem `Aprovado: sim`: recusar e direcionar para prevec-review-execution
+- Seção TASK-X.Y.Z não tem `Resultado: aprovado`: recusar e direcionar para prevec-review-execution
 - Commit falha (hook): corrigir o que o hook reportou, nunca usar --no-verify
 - gh não instalado: orientar instalação e fornecer body do PR manualmente
 - CHANGELOG/MEMORY ausentes mas configurados: criar arquivo antes de inserir

@@ -57,6 +57,7 @@ O PLANNER opera em 4 modos conforme o contexto:
 3. [ARCHITECTURE_RULE específica do projeto — ex: Domain Layer sem imports do framework]
 4. Mudanças em `.context/ARCHITECTURE/` requerem atualização de `context-version.yaml`
 5. PRDs seguem formato: `.context/DOCS/PRDS/NNNN-PRD-<topic-kebab>.md`
+6. Ao final de toda ação concluída: mostrar o próximo comando com argumentos reais — nunca deixar o usuário sem saber o que digitar em seguida
 
 ## Workflow por Modo
 
