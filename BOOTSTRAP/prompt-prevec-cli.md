@@ -124,7 +124,7 @@ mkdir -p .context/DOCS/TASKS
 mkdir -p .context/DOCS/PRDS
 mkdir -p .context/DESIGN
 mkdir -p .context/WORKFLOW
-mkdir -p .context/.session/.archive
+mkdir -p .context/.session
 
 # Condicional CHANGELOG
 if [[ "$USE_CHANGELOG" == "sim" ]]; then

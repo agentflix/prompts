@@ -74,7 +74,7 @@ SEMPRE preenche o modelo de contexto antes de delegar.
 | Contrato | `AGENTS.md` |
 | Modelo de handoff | `.context/orchestrator-context-model.md` |
 | Sessions ativos | `.context/.session/` |
-| Sessions arquivados | `.context/.session/.archive/` |
+| Sessions | `.context/.session/` — deletados ao finalizar feature |
 | Workflow | `.context/WORKFLOW/PREVC.md` |
 | Features | `.context/DOCS/FEATURES/` |
 | Tasks | `.context/DOCS/TASKS/` |

@@ -155,10 +155,9 @@ Atualizar cabeçalho do session file:
 - Status: ✅ Concluída
 ```
 
-Arquivar o session file:
+Deletar o session file:
 ```bash
-mkdir -p .context/.session/.archive
-mv .context/.session/[feature]-session.md .context/.session/.archive/[feature]-session.md
+rm .context/.session/[feature]-session.md
 ```
 
 Criar pull request usando dados agregados das seções do session arquivado:
@@ -204,13 +203,13 @@ EOF
 📋 PR: [URL]
 📋 CHANGELOG: [atualizado / não configurado]
 📋 MEMORY: [N entradas / não configurado]
-📋 Session: arquivado em .context/.session/.archive/[feature]-session.md
+📋 Session: deletado
 ➡️  Feature entregue. Próxima: /prevec-new-plan [nova ideia]
 ```
 
 ## Error Handling
 
-- Session ausente: checar `.context/.session/.archive/` — pode ter sido arquivado antes. Se não achar, rodar prevec-execute-task novamente
+- Session ausente: feature pode já ter sido finalizada e session deletado. Checar se tasks estão ✅ em `.context/DOCS/TASKS/`. Se não, rodar prevec-execute-task novamente
 - Seção TASK-X.Y.Z não tem `Resultado: aprovado`: recusar e direcionar para prevec-review-execution
 - Commit falha (hook): corrigir o que o hook reportou, nunca usar --no-verify
 - gh não instalado: orientar instalação e fornecer body do PR manualmente
