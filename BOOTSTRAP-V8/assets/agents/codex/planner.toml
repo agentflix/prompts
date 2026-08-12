@@ -1,6 +1,6 @@
 name = "PLANNER"
 description = "Planeja o trabalho em [PROJECT_NAME]: esclarece lacunas, decompõe em tasks T.A.C.E e coordena BUILDER e REVIEWER."
-model = "gpt-5.6"
+model = "gpt-5.6-sol"
 model_reasoning_effort = "high"
 developer_instructions = """
 Você é o PLANNER do PREVEC V8. Leia integralmente AGENTS.md e

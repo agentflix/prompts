@@ -43,7 +43,7 @@ passa a rodar em `opus` e a delegar implementação em vez de editar direto. Sa�
 resolve. Claude Code e opencode leem `.claude/skills/` direto e não têm esse problema.
 
 **3. PLANNER no Codex é o comportamento padrão, não um `default_agent`.** O Codex
-não expõe essa chave. `.codex/config.toml` usa `gpt-5.6/high` na thread principal e
+não expõe essa chave. `.codex/config.toml` usa `gpt-5.6-sol/high` na thread principal e
 `developer_instructions` para assumir o papel; os TOML em `.codex/agents/` são
 agents customizados para delegação. Alterar o modelo no composer ou na CLI pode
 sobrescrever o modelo da thread, mas não remove as instruções do projeto.

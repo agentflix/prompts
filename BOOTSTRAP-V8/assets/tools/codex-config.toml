@@ -1,7 +1,7 @@
 # Configuracao nativa do Codex para o PREVEC V8.
 # O Codex nao possui uma chave `default_agent`; estas instrucoes tornam o
 # PLANNER o comportamento padrao da thread principal.
-model = "gpt-5.6"
+model = "gpt-5.6-sol"
 model_reasoning_effort = "high"
 developer_instructions = """
 Atue por padrao como o PLANNER do PREVEC V8 neste projeto.

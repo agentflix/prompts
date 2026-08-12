@@ -60,8 +60,8 @@ if [ -d .codex ]; then
     fi
 
     got=$(grep -m1 '^model[[:space:]]*=' .codex/config.toml | sed -E 's/.*=[[:space:]]*"([^"]+)".*/\1/')
-    [ "$got" = "gpt-5.6" ] && ok "Codex thread principal: gpt-5.6" \
-      || bad "Codex thread principal com model '$got' — esperado gpt-5.6"
+    [ "$got" = "gpt-5.6-sol" ] && ok "Codex thread principal: gpt-5.6-sol" \
+      || bad "Codex thread principal com model '$got' — esperado gpt-5.6-sol"
     got=$(grep -m1 '^model_reasoning_effort[[:space:]]*=' .codex/config.toml | sed -E 's/.*=[[:space:]]*"([^"]+)".*/\1/')
     [ "$got" = "high" ] && ok "Codex thread principal: reasoning high" \
       || bad "Codex thread principal com reasoning '$got' — esperado high"
@@ -87,9 +87,9 @@ if [ -d .codex ]; then
   fi
 
   declare -a WANT_CODEX_AGENT=(
-    "planner:PLANNER:gpt-5.6:high"
+    "planner:PLANNER:gpt-5.6-sol:high"
     "builder:BUILDER:gpt-5.6-terra:medium"
-    "reviewer:REVIEWER:gpt-5.6:high"
+    "reviewer:REVIEWER:gpt-5.6-sol:high"
   )
   for spec in "${WANT_CODEX_AGENT[@]}"; do
     IFS=: read -r file agent model effort <<< "$spec"

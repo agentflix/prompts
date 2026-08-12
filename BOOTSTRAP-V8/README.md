@@ -84,9 +84,9 @@ opencode.json                 # condicional
 
 | Agent | Claude Code | Codex | Racional |
 |---|---|---|---|
-| PLANNER | `opus` | `gpt-5.6` · `high` | Decisão, risco e decomposição |
+| PLANNER | `opus` | `gpt-5.6-sol` · `high` | Decisão, risco e decomposição |
 | BUILDER | `sonnet` | `gpt-5.6-terra` · `medium` | Execução delimitada com menor custo |
-| REVIEWER | `sonnet` | `gpt-5.6` · `high` | Contratos, edge cases e evidência |
+| REVIEWER | `sonnet` | `gpt-5.6-sol` · `high` | Contratos, edge cases e evidência |
 
 No Claude, `settings.json` seleciona o agent `PLANNER`. No Codex não existe uma
 chave nativa `default_agent`; o bootstrap configura a thread principal com o mesmo

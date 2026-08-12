@@ -19,9 +19,9 @@ Quando Codex foi selecionado, gere também:
 
 | Agent TOML | Modelo | Esforço | Papel |
 |---|---|---|---|
-| `planner.toml` | `gpt-5.6` | `high` | Planejamento profundo e coordenação |
+| `planner.toml` | `gpt-5.6-sol` | `high` | Planejamento profundo e coordenação |
 | `builder.toml` | `gpt-5.6-terra` | `medium` | Execução delimitada, rápida e econômica |
-| `reviewer.toml` | `gpt-5.6` | `high` | Revisão de contratos, risco e evidência |
+| `reviewer.toml` | `gpt-5.6-sol` | `high` | Revisão de contratos, risco e evidência |
 
 ```bash
 mkdir -p .codex/agents
@@ -34,7 +34,7 @@ done
 ## Alocação de modelo
 
 No Claude, `opus` fica onde a decisão é o produto e `sonnet` executa ou verifica
-contra critério explícito. No Codex, `gpt-5.6/high` cobre decisão e auditoria;
+contra critério explícito. No Codex, `gpt-5.6-sol/high` cobre decisão e auditoria;
 `gpt-5.6-terra/medium` reduz custo e latência da execução mecânica.
 
 > No Claude, os 7 revisores do `code-review-confiavel` herdam o modelo do REVIEWER.

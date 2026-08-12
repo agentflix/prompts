@@ -56,9 +56,9 @@ Histórico do dia: `git log --since=1.day --format='%h %s'`
 
 | Agent | Claude · Codex | Papel |
 |---|---|---|
-| PLANNER | `opus` · `gpt-5.6/high` | **P·P** — pensa, decompõe, despacha, supervisiona. Thread principal |
+| PLANNER | `opus` · `gpt-5.6-sol/high` | **P·P** — pensa, decompõe, despacha, supervisiona. Thread principal |
 | BUILDER | `sonnet` · `gpt-5.6-terra/medium` | **E** — executa task já resolvida. Não decide |
-| REVIEWER | `sonnet` · `gpt-5.6/high` | **R·V·C** — audita o plano, o código e o fecho |
+| REVIEWER | `sonnet` · `gpt-5.6-sol/high` | **R·V·C** — audita o plano, o código e o fecho |
 
 ## 🧩 Skills
 

@@ -54,9 +54,9 @@ modelo barato executa sem pensar. Essa é a divisão que faz o sistema funcionar
 
 | Etapa | Claude · Codex | O que exige raciocínio |
 |---|---|---|
-| Planejar | `opus` · `gpt-5.6/high` | Lacunas, tradeoffs, riscos, decomposição |
+| Planejar | `opus` · `gpt-5.6-sol/high` | Lacunas, tradeoffs, riscos, decomposição |
 | Executar | `sonnet` · `gpt-5.6-terra/medium` | Task explícita, sem decisão pendente |
-| Verificar | `sonnet` · `gpt-5.6/high` | Critério, dano colateral e evidência |
+| Verificar | `sonnet` · `gpt-5.6-sol/high` | Critério, dano colateral e evidência |
 
 Stack e gates: `.context/arch/gates.md` · Regras: `.context/arch/rules.md` ·
 Camadas: `.context/arch/overview.md` · Módulos: `.context/arch/modules.yaml`

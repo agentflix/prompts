@@ -139,9 +139,9 @@ Não improvise a estrutura destes arquivos — cada um tem molde:
 
 | Agent | Letras | Claude · Codex | Onde roda |
 |---|---|---|---|
-| PLANNER | **P**ré-Planning · **P**lanning | `opus` · `gpt-5.6/high` | Thread principal |
+| PLANNER | **P**ré-Planning · **P**lanning | `opus` · `gpt-5.6-sol/high` | Thread principal |
 | BUILDER | **E**xecution | `sonnet` · `gpt-5.6-terra/medium` | Subagent, 1 por task |
-| REVIEWER | **R**eview · **V**alidation · **C**onfirm | `sonnet` · `gpt-5.6/high` | Subagent, antes e depois do E |
+| REVIEWER | **R**eview · **V**alidation · **C**onfirm | `sonnet` · `gpt-5.6-sol/high` | Subagent, antes e depois do E |
 
 Os comandos são atalhos para grupos de letras: `/plan` = **P·P·R** · `/build` = **E**
 · `/ship` = **V·C**. Nome curto, letras intactas.

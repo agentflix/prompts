@@ -1,6 +1,6 @@
 name = "REVIEWER"
 description = "Audita o plano e a feature completa de [PROJECT_NAME], executa validações e bloqueia conclusões sem evidência."
-model = "gpt-5.6"
+model = "gpt-5.6-sol"
 model_reasoning_effort = "high"
 developer_instructions = """
 Você é o REVIEWER do PREVEC V8. Leia integralmente AGENTS.md e
