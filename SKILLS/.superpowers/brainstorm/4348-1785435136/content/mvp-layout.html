@@ -1,0 +1,80 @@
+<h2>GrowthOS Local — estrutura do MVP</h2>
+<p class="subtitle">Uma interface inspirada em apps de chat, com projetos e memória sempre visíveis.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Tela principal: conversa dentro de um projeto</div>
+  <div class="mockup-body" style="padding:0;display:grid;grid-template-columns:210px minmax(360px,1fr) 260px;min-height:520px">
+    <aside style="border-right:1px solid #ddd;padding:14px">
+      <div style="font-weight:700;margin-bottom:18px">GrowthOS</div>
+      <button class="mock-button" style="width:100%;margin-bottom:16px">+ Novo projeto</button>
+      <div class="label">PROJETOS</div>
+      <div style="padding:10px;background:#eef2ff;border-radius:8px;margin-top:8px">SaaS WhatsApp</div>
+      <div style="padding:10px;margin-top:4px">Vibe Coding App</div>
+      <div style="padding:10px;margin-top:4px">Nova ideia</div>
+      <div style="margin-top:24px" class="label">ATALHOS</div>
+      <div style="padding:8px">Experimentos</div>
+      <div style="padding:8px">Aprendizados</div>
+      <div style="padding:8px">Biblioteca</div>
+    </aside>
+
+    <main style="padding:18px;display:flex;flex-direction:column">
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid #ddd;padding-bottom:12px">
+        <div>
+          <strong>SaaS WhatsApp</strong>
+          <div style="font-size:12px;color:#666">Chat: Estratégia para clínicas</div>
+        </div>
+        <button class="mock-button">Nova conversa</button>
+      </div>
+      <div style="flex:1;padding:20px 4px">
+        <div style="max-width:80%;padding:12px;border-radius:10px;background:#f3f4f6;margin-left:auto">
+          Analise o resultado da campanha para clínicas.
+        </div>
+        <div style="max-width:88%;padding:14px;margin-top:16px;border-left:3px solid #6366f1">
+          <strong>Análise baseada em 6 fontes</strong>
+          <p>O ângulo “pacientes perdidos” reduziu o CAC, mas a amostra ainda não permite generalização...</p>
+          <div style="font-size:12px;color:#666">EXP-017 · metricas-julho.csv · 4 entrevistas</div>
+        </div>
+      </div>
+      <div style="border:1px solid #ccc;border-radius:12px;padding:12px">
+        <input class="mock-input" style="width:100%" placeholder="Pergunte sobre o projeto...">
+        <div style="display:flex;justify-content:space-between;margin-top:8px">
+          <span style="font-size:12px;color:#666">Codex • contexto automático</span>
+          <button class="mock-button">Enviar</button>
+        </div>
+      </div>
+    </main>
+
+    <aside style="border-left:1px solid #ddd;padding:14px">
+      <div class="label">CONTEXTO DESTA CONVERSA</div>
+      <div style="margin-top:10px;padding:10px;border:1px solid #ddd;border-radius:8px">
+        <strong>Arquivos selecionados</strong>
+        <div style="font-size:12px;margin-top:8px">✓ produto.md</div>
+        <div style="font-size:12px">✓ metricas-julho.csv</div>
+        <div style="font-size:12px">✓ EXP-017</div>
+      </div>
+      <div style="margin-top:10px;padding:10px;border:1px solid #ddd;border-radius:8px">
+        <strong>Memória recuperada</strong>
+        <div style="font-size:12px;margin-top:8px">3 aprendizados aprovados</div>
+        <div style="font-size:12px">1 hipótese aberta</div>
+      </div>
+      <div style="margin-top:10px;padding:10px;border:1px solid #ddd;border-radius:8px">
+        <strong>Sessão Codex</strong>
+        <div style="font-size:12px;margin-top:8px">Ativa · local</div>
+        <div style="font-size:12px">Somente leitura por padrão</div>
+      </div>
+      <button class="mock-button" style="width:100%;margin-top:12px">Gerenciar contexto</button>
+    </aside>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Telas incluídas no MVP</h3>
+  <div class="options" data-multiselect>
+    <div class="option" data-choice="projects" onclick="toggleSelect(this)"><div class="letter">1</div><div class="content"><h3>Projetos</h3><p>Criar projeto, descrição, objetivos e instruções permanentes.</p></div></div>
+    <div class="option" data-choice="chat" onclick="toggleSelect(this)"><div class="letter">2</div><div class="content"><h3>Chat</h3><p>Conversas persistidas e sessões controladas do Codex.</p></div></div>
+    <div class="option" data-choice="files" onclick="toggleSelect(this)"><div class="letter">3</div><div class="content"><h3>Arquivos</h3><p>Upload, texto extraído, tags e seleção para o contexto.</p></div></div>
+    <div class="option" data-choice="memory" onclick="toggleSelect(this)"><div class="letter">4</div><div class="content"><h3>Memória</h3><p>Evidências, hipóteses e aprendizados com aprovação humana.</p></div></div>
+    <div class="option" data-choice="experiments" onclick="toggleSelect(this)"><div class="letter">5</div><div class="content"><h3>Experimentos</h3><p>Hipótese, variantes, métricas, conclusão e próximo teste.</p></div></div>
+    <div class="option" data-choice="settings" onclick="toggleSelect(this)"><div class="letter">6</div><div class="content"><h3>Configurações</h3><p>Codex, diretórios permitidos, modelo e limites de execução.</p></div></div>
+  </div>
+</div>

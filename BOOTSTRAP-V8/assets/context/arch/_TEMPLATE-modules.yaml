@@ -1,0 +1,73 @@
+# _TEMPLATE-modules.yaml → gera .context/arch/modules.yaml
+#
+# Assunto EXCLUSIVO: quais módulos existem, o que cada um pode importar, o que é
+# proibido. É a fonte da verdade — o diagrama em overview.md é a leitura visual dela.
+#
+# NÃO pode conter: diagrama, regras de código, comandos.
+# Este arquivo funde o modules.yaml + dependencies.yaml do V7: eram dois arquivos
+# descrevendo a mesma relação, e divergiam.
+#
+# Mantenha compacto. Agents carregam isto inteiro para decidir seção A de task.
+#
+# FALLBACK OBRIGATÓRIO — projeto onde o grafo de imports AINDA NÃO EXISTE
+# (greenfield, módulos que ainda não se falam, código stub). Confira antes de escrever:
+#
+#   grep -rn "^from <pkg>\|^import <pkg>" <dir-do-código> | head -30
+#
+# Zero resultado significa que can_import/forbidden não podem ser DESCRITIVOS —
+# não há o que descrever. Nesse caso:
+#
+# 1. Declare o mínimo defensável: can_import: [shared] e forbidden: [ALL_DOMAINS].
+#    É mais restritivo que o necessário de propósito — abrir depois é decisão
+#    registrada; fechar depois é breaking change em código que já dependeu.
+# 2. Marque no comentário do módulo que a regra é PRESCRITIVA, não observada, e
+#    guarde o comando de verificação que você rodou.
+# 3. Registre em overview.md que o primeiro import entre domínios exige decisão em
+#    arch/decisions/ — é o momento em que a regra deixa de ser hipótese.
+#
+# Isto não viola a regra "nunca invente": você não está inventando um fato sobre o
+# código, está declarando uma restrição e dizendo que ela é uma escolha.
+
+version: 1
+project: [PROJECT_NAME]
+
+deployables:
+  [nome]:
+    path: [path]
+    stack: [linguagem + framework]
+    layers: [camada, camada, camada]   # na ordem real de chamada
+
+shared:
+  # O que qualquer módulo pode importar. É folha: não importa módulo de domínio.
+  [nome-do-deployable]:
+    - [path] # [para que serve, 3 palavras]
+
+modules:
+  - name: [modulo]
+    description: [uma linha]
+    paths:
+      [deployable]: [path, path]
+    can_import: [modulo, shared]
+    forbidden: [modulo, modulo]
+
+  - name: [modulo]
+    description: [uma linha]
+    paths:
+      [deployable]: [path]
+    can_import: [shared]
+    forbidden: [ALL_DOMAINS]   # use quando o módulo não pode importar nenhum domínio
+
+# Regras de camada que valem dentro de cada deployable — só as BLOQUEANTES.
+# Regra de negócio ou convenção de estilo NÃO entra aqui: vai para rules.md.
+layer_rules:
+  [nome-do-deployable]:
+    allowed:
+      - [camada] pode importar: [camada, camada]
+    forbidden:
+      - [violação concreta e verificável]
+
+# Contratos que atravessam módulos e não podem quebrar sem decisão registrada.
+contracts:
+  [nome-do-contrato]:
+    rule: [o que precisa ser verdade]
+    forbidden: [o que nunca fazer]

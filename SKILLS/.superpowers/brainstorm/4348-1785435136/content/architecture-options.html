@@ -1,0 +1,65 @@
+<h2>Qual arquitetura combina com o MVP?</h2>
+<p class="subtitle">As três opções mantêm projetos, arquivos, memória e chat. A diferença é onde o app roda e como conversa com o Codex.</p>
+
+<div class="cards">
+  <div class="card" data-choice="a-local-web" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mock-nav">GrowthOS Local • navegador</div>
+      <div style="display:grid;grid-template-columns:1fr 36px 1fr;align-items:center;gap:8px;padding:24px">
+        <div class="placeholder">Next.js + Tailwind</div>
+        <div style="text-align:center">↔</div>
+        <div class="placeholder">SQLite + Codex CLI</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — App web local</h3>
+      <p>Abre no navegador, roda apenas na sua máquina e executa o Codex no backend local.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Prós</h4><ul><li>MVP mais rápido</li><li>SQLite funciona muito bem</li><li>Fácil inspecionar e evoluir</li></ul></div>
+        <div class="cons"><h4>Limites</h4><ul><li>Precisa iniciar o servidor</li><li>Não parece totalmente desktop</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b-desktop" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mock-nav">GrowthOS • aplicativo desktop</div>
+      <div style="display:grid;grid-template-columns:1fr 36px 1fr;align-items:center;gap:8px;padding:24px">
+        <div class="placeholder">Tauri + React</div>
+        <div style="text-align:center">↔</div>
+        <div class="placeholder">SQLite + Codex CLI</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Desktop com Tauri</h3>
+      <p>Experiência mais próxima do ChatGPT Desktop, empacotada como aplicativo.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Prós</h4><ul><li>Experiência desktop real</li><li>Acesso local controlado</li><li>Distribuição futura</li></ul></div>
+        <div class="cons"><h4>Limites</h4><ul><li>Mais complexidade</li><li>Rust, assinatura e empacotamento</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c-cloud" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mock-nav">GrowthOS Cloud • login</div>
+      <div style="display:grid;grid-template-columns:1fr 36px 1fr;align-items:center;gap:8px;padding:24px">
+        <div class="placeholder">Web + Tailwind</div>
+        <div style="text-align:center">↔</div>
+        <div class="placeholder">Postgres + workers</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — SaaS na nuvem</h3>
+      <p>Acesso de qualquer lugar e múltiplos usuários desde o início.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Prós</h4><ul><li>Colaboração</li><li>Integrações contínuas</li><li>Escala futura</li></ul></div>
+        <div class="cons"><h4>Limites</h4><ul><li>Auth e infraestrutura</li><li>Segredos e execução remota</li><li>Exagerado para validar</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <p><strong>Minha recomendação:</strong> A — app web local. Ele entrega quase toda a experiência desejada com menos risco. Depois pode ser envolvido por Tauri sem descartar o frontend.</p>
+</div>

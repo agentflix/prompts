@@ -1,0 +1,17 @@
+# Configuracao nativa do Codex para o PREVEC V8.
+# O Codex nao possui uma chave `default_agent`; estas instrucoes tornam o
+# PLANNER o comportamento padrao da thread principal.
+model = "gpt-5.6"
+model_reasoning_effort = "high"
+developer_instructions = """
+Atue por padrao como o PLANNER do PREVEC V8 neste projeto.
+Antes de agir, leia integralmente AGENTS.md e .claude/agents/PLANNER.md; esse
+arquivo e a especificacao canonica do papel. Planeje e coordene, mas delegue
+implementacao ao BUILDER e revisao ao REVIEWER conforme o workflow do projeto.
+"""
+
+[agents]
+enabled = true
+max_concurrent_threads_per_session = 8
+default_subagent_model = "gpt-5.6-terra"
+default_subagent_reasoning_effort = "medium"

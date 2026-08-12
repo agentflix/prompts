@@ -1,0 +1,71 @@
+<h2>Como o GrowthOS conversa com o Codex</h2>
+<p class="subtitle">Uma instância local do App Server é iniciada pelo backend e atende todas as conversas enquanto o GrowthOS estiver aberto.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Fluxo de uma mensagem</div>
+  <div class="mockup-body" style="padding:26px">
+    <div style="display:grid;grid-template-columns:1fr 42px 1fr 42px 1fr;gap:8px;align-items:center">
+      <div style="border:1px solid #ddd;border-radius:12px;padding:18px;background:#fff">
+        <div class="label">1 · INTERFACE</div>
+        <h3 style="margin:7px 0">Usuário envia</h3>
+        <p style="font-size:13px">Mensagem + arquivos fixados + projeto ativo.</p>
+      </div>
+      <div style="text-align:center;font-size:22px">→</div>
+      <div style="border:1px solid #ddd;border-radius:12px;padding:18px;background:#fff">
+        <div class="label">2 · CONTEXT ENGINE</div>
+        <h3 style="margin:7px 0">Monta o pacote</h3>
+        <p style="font-size:13px">Instruções, contexto permanente, memória relevante e fontes.</p>
+      </div>
+      <div style="text-align:center;font-size:22px">→</div>
+      <div style="border:1px solid #111;border-radius:12px;padding:18px;background:#111;color:#fff">
+        <div class="label" style="color:#aaa">3 · CODEX</div>
+        <h3 style="margin:7px 0;color:#fff">App Server local</h3>
+        <p style="font-size:13px;color:#ddd">Thread persistente, eventos em streaming e aprovações.</p>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 42px 1fr 42px 1fr;gap:8px;align-items:center;margin-top:22px">
+      <div style="border:1px solid #ddd;border-radius:12px;padding:18px;background:#fff">
+        <div class="label">6 · MEMÓRIA</div>
+        <h3 style="margin:7px 0">Propõe, não impõe</h3>
+        <p style="font-size:13px">Aprendizados candidatos aguardam aprovação humana.</p>
+      </div>
+      <div style="text-align:center;font-size:22px">←</div>
+      <div style="border:1px solid #ddd;border-radius:12px;padding:18px;background:#fff">
+        <div class="label">5 · PERSISTÊNCIA</div>
+        <h3 style="margin:7px 0">Registra o turno</h3>
+        <p style="font-size:13px">Mensagens, fontes usadas, eventos e ID da thread.</p>
+      </div>
+      <div style="text-align:center;font-size:22px">←</div>
+      <div style="border:1px solid #ddd;border-radius:12px;padding:18px;background:#fff">
+        <div class="label">4 · STREAM</div>
+        <h3 style="margin:7px 0">Atualiza a UI</h3>
+        <p style="font-size:13px">Resposta, ferramentas, comandos, erros e pedidos de aprovação.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="split" style="margin-top:20px">
+  <div class="mockup">
+    <div class="mockup-header">Processo local</div>
+    <div class="mockup-body">
+      <p><strong>Backend Next.js/Node</strong></p>
+      <p style="font-size:13px">Inicia <code>codex app-server</code> via stdio, realiza o handshake e mantém um gerenciador de threads.</p>
+      <p style="font-size:13px">Cada conversa do GrowthOS guarda seu <code>codex_thread_id</code> para continuar ou retomar.</p>
+    </div>
+  </div>
+  <div class="mockup">
+    <div class="mockup-header">Permissões do MVP</div>
+    <div class="mockup-body">
+      <p><strong>Somente leitura por padrão</strong></p>
+      <p style="font-size:13px">O Codex lê apenas a pasta do projeto selecionado. Escrita e comandos sensíveis exigem aprovação explícita na interface.</p>
+      <p style="font-size:13px">Nenhum listener é exposto na rede; transporte local por stdio.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:22px">
+  <h3>Por que App Server, não apenas <code>codex exec</code>?</h3>
+  <p class="subtitle">Porque o produto precisa de threads retomáveis, streaming granular, aprovações e eventos de ferramentas. O CLI não interativo fica como fallback para diagnóstico.</p>
+</div>
