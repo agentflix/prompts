@@ -1,0 +1,24 @@
+{
+  "$id": "_defs",
+  "title": "Shared definitions (inlined by validator)",
+  "source": {
+    "type": "object",
+    "required": ["repo"],
+    "properties": {
+      "repo": {"type": "string", "minLength": 1},
+      "file": {"type": "string", "minLength": 1},
+      "line": {"type": "integer", "minimum": 1},
+      "end_line": {"type": "integer", "minimum": 1},
+      "object": {"type": "string", "minLength": 1},
+      "capture": {"type": "string", "minLength": 1}
+    },
+    "anyOf": [
+      {"required": ["file", "line"]},
+      {"required": ["object"]},
+      {"required": ["capture"]}
+    ]
+  },
+  "sources": {"type": "array", "minItems": 1, "items": {"$ref": "#source"}},
+  "confidence": {"type": "string", "enum": ["verified", "inferred", "unknown"]},
+  "critic": {"type": "string", "enum": ["pending", "approved", "corrected", "rejected"]}
+}

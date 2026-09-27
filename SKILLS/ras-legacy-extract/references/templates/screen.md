@@ -1,0 +1,31 @@
+# Template — screens/SCR-<MOD>-NNN.md
+
+```markdown
+# SCR-LIC-002 — Nova licença
+
+- **Rota**: `/licencas/nova` · **Menu**: Licenças › Nova
+- **Fonte**: `frontend:src/pages/licencas/Nova.tsx:1-240`
+- **Perfis**: franqueado, matriz (matriz vê campo "Desconto")
+- **Objetivo**: <1 frase>
+- **Screenshot**: ![](SCR-LIC-002.png)
+
+## Campos
+| Label | Nome | Tipo | Obrig. | Máscara/formato | Padrão | Opções (origem) | Validação no front | Campo na API |
+|---|---|---|---|---|---|---|---|---|
+| Aplicativo | aplicativo_id | select | sim | — | — | API-APP-001 | — | aplicativo_id |
+| Vencimento | vencimento | data | sim | dd/mm/aaaa | hoje+30 | — | ≥ hoje | vencimento |
+
+## Listas / tabelas (se houver)
+| Coluna | Ordenável | Filtro | Observação |
+|---|---|---|---|
+
+## Ações
+| Botão/link | Pré-condição | Chama | Resultado / mensagem | Vai para |
+|---|---|---|---|---|
+| Salvar | formulário válido | API-LIC-007 | "Licença criada" | SCR-LIC-001 |
+| Cancelar | — | — | — | SCR-LIC-001 |
+
+## Observações
+- Validações só no front (sem equivalente na API): <lista> → FND-*
+- Divergências código × tela real: <lista> → FND-*
+```

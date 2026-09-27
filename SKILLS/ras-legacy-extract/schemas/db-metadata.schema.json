@@ -1,0 +1,43 @@
+{
+  "title": "01-database/db-metadata.json",
+  "type": "object",
+  "required": ["contract_version", "engine", "extracted_at", "tables"],
+  "properties": {
+    "contract_version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$"},
+    "engine": {"type": "string", "minLength": 1},
+    "engine_version": {"type": "string"},
+    "extracted_at": {"type": "string"},
+    "environment": {"type": "string"},
+    "tables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "columns"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "columns": {"type": "array", "items": {
+            "type": "object", "required": ["name", "type"],
+            "properties": {
+              "name": {"type": "string"}, "type": {"type": "string"},
+              "nullable": {"type": "boolean"}, "default": {"type": ["string", "null"]}
+            }
+          }},
+          "primary_key": {"type": "array", "items": {"type": "string"}},
+          "foreign_keys": {"type": "array", "items": {"type": "object"}},
+          "indexes": {"type": "array", "items": {"type": "object"}},
+          "checks": {"type": "array", "items": {"type": "object"}},
+          "row_count": {"type": ["integer", "null"]},
+          "row_count_measured_at": {"type": "string"}
+        }
+      }
+    },
+    "views": {"type": "array", "items": {"type": "object", "required": ["name"]}},
+    "procedures": {"type": "array", "items": {"type": "object", "required": ["name"]}},
+    "triggers": {"type": "array", "items": {
+      "type": "object", "required": ["name", "table"],
+      "properties": {"name": {"type": "string"}, "table": {"type": "string"},
+        "event": {"type": "string"}, "active": {"type": "boolean"}, "position": {"type": "integer"}}
+    }},
+    "sequences": {"type": "array", "items": {"type": "object", "required": ["name"]}}
+  }
+}
