@@ -12,6 +12,9 @@ from pathlib import Path
 
 from _common import Contract, Report, base_args, covered_keys, finish, main_wrapper, module_entities
 
+DB_KEY_PREFIX = {"tables": "table", "views": "view", "procedures": "procedure",
+                 "triggers": "trigger", "sequences": "sequence"}
+
 
 def _inventory_checks(c: Contract, report: Report, final: bool) -> None:
     items = c.inventory_items()
@@ -30,6 +33,14 @@ def _inventory_checks(c: Contract, report: Report, final: bool) -> None:
     for kind, cc in counts.items():
         if kind not in by_kind and cc.get("count", 0) > 0 and not cc.get("explanation"):
             report.fail(f"controle encontrou {cc['count']} '{kind}', extrator encontrou 0")
+    if c.db:
+        keys = {str(it.get("key", "")).upper() for it in items}
+        for coll, prefix in DB_KEY_PREFIX.items():
+            for obj in c.db.get(coll, []) or []:
+                key = f"{prefix}:{obj.get('name', '')}"
+                if key.upper() not in keys:
+                    report.fail(f"db-metadata tem {coll[:-1]} {obj.get('name')!r} sem item "
+                                f"'{key}' no inventário")
     known = set(c.manifest_modules()) | {"_unassigned"}
     for it in items:
         if it.get("module") not in known:

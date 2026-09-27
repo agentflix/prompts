@@ -26,6 +26,64 @@ def _module_markdown_ids(mod_dir: Path) -> set[str]:
     return ids
 
 
+NFR_FILES = {"SEC": "security.md", "PERF": "volumetry-performance.md",
+             "SRCH": "search.md", "AVL": "availability.md"}
+FND_DEF = re.compile(r"^\|\s*(FND-\d{3})\s*\|", re.M)
+UNK_DEF = re.compile(r"^##\s+(UNK-\d{3})\b", re.M)
+NFR_DEF = re.compile(r"^\|\s*(NFR-[A-Z0-9]{2,6}-\d{3})\s*\|", re.M)
+PRC_OBJECT = re.compile(r"^\*\*Objeto\*\*:\s*`([^`]+)`", re.M)
+
+
+def _defs(path: Path, pattern: re.Pattern, label: str, report: Report) -> list[str]:
+    if not path.exists():
+        return []
+    found = pattern.findall(path.read_text(encoding="utf-8"))
+    for dup in sorted({x for x in found if found.count(x) > 1}):
+        report.fail(f"{label}: {dup} definido mais de uma vez")
+    return found
+
+
+def _markdown_definitions(root: Path, c: Contract, report: Report) -> set[str]:
+    """IDs defined outside module.json: FND, UNK, NFR, PRC and PAR."""
+    known: set[str] = set()
+    known |= set(_defs(root / "findings.md", FND_DEF, "findings.md", report))
+    known |= set(_defs(root / "unknowns.md", UNK_DEF, "unknowns.md", report))
+
+    nfr_dir = root / "04-nfr"
+    for md in sorted(nfr_dir.glob("*.md")) if nfr_dir.is_dir() else []:
+        for nid in _defs(md, NFR_DEF, f"04-nfr/{md.name}", report):
+            area = nid.split("-")[1]
+            expected = NFR_FILES.get(area)
+            if expected is None:
+                report.fail(f"04-nfr/{md.name}: {nid} usa área desconhecida (use {', '.join(NFR_FILES)})")
+            elif expected != md.name:
+                report.fail(f"04-nfr/{md.name}: {nid} deveria estar em {expected}")
+            if nid in known:
+                report.fail(f"{nid} definido em mais de um arquivo de 04-nfr/")
+            known.add(nid)
+
+    db_objects: set[str] = set()
+    if c.db:
+        for coll in ("tables", "views", "procedures", "triggers", "sequences"):
+            db_objects |= {str(o.get("name", "")).upper() for o in c.db.get(coll, [])}
+    prc_dir = root / "01-database" / "procedures"
+    for md in sorted(prc_dir.glob("*.md")) if prc_dir.is_dir() else []:
+        pid = md.stem
+        if not ID_PATTERNS["PRC"].match(pid):
+            report.fail(f"01-database/procedures/{md.name}: nome deve ser PRC-<MOD>-NNN.md")
+            continue
+        m = PRC_OBJECT.search(md.read_text(encoding="utf-8"))
+        if not m:
+            report.fail(f"{pid}: falta a linha **Objeto**: `<TIPO> <NOME>`")
+        elif db_objects and m.group(1).split()[-1].upper() not in db_objects:
+            report.fail(f"{pid}: objeto {m.group(1)!r} não existe no db-metadata")
+        known.add(pid)
+
+    cases = root / "05-parity" / "cases"
+    known |= {p.stem for p in cases.glob("*.json")} if cases.is_dir() else set()
+    return known
+
+
 def run(argv: list[str]) -> Report:
     args = base_args("Valida IDs e referências cruzadas").parse_args(argv)
     report = Report("ids")
@@ -76,10 +134,7 @@ def run(argv: list[str]) -> Report:
     for dup in sorted({x for x in repo_names if repo_names.count(x) > 1}):
         report.fail(f"manifest: repo duplicado {dup}")
 
-    findings = _ids_in_markdown(root / "findings.md")
-    unknowns = _ids_in_markdown(root / "unknowns.md")
-    known = set(registry) | {i for i in findings if i.startswith("FND")} | {
-        i for i in unknowns if i.startswith("UNK")}
+    known = set(registry) | _markdown_definitions(root, c, report)
 
     def ref(owner: str, target: str | None) -> None:
         if target and target not in known:
@@ -101,6 +156,11 @@ def run(argv: list[str]) -> Report:
                 ref(ent.get("id", "?"), a.get("api"))
                 if (a.get("navigates_to") or "").startswith("SCR-"):
                     ref(ent.get("id", "?"), a["navigates_to"])
+        for cov in mod.get("covers", []) or []:
+            for by in cov.get("by", []) or []:
+                if by not in known:
+                    report.fail(f"{name}: covers[{cov.get('inventory_key')!r}].by cita {by!r}, "
+                                "que não é um ID existente")
 
         # JSON <-> Markdown parity for the module's own IDs.
         mod_dir = root / "02-modules" / name
@@ -131,6 +191,15 @@ def run(argv: list[str]) -> Report:
             ref(cid or case.name, data.get("api"))
             for r in data.get("requirements", []) or []:
                 ref(cid or case.name, r)
+
+    # Every ID cited in any Markdown file must resolve (verification logs may cite removed IDs).
+    scan_root = root / "02-modules" / args.module if args.module else root
+    for md in sorted(scan_root.rglob("*.md")):
+        rel = md.relative_to(root)
+        if md.name == "verification-log.md" or rel.parts[0] == "adapter":
+            continue
+        for i in sorted(_ids_in_markdown(md) - known):
+            report.fail(f"{rel}: cita {i}, que não está definido em lugar nenhum")
 
     # Inventory keys must be unique.
     seen: set[str] = set()

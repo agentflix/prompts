@@ -43,8 +43,22 @@ Bom:
 - `REQ-LIC-O001` — ONDE a franquia tiver `cobranca_pre_paga = 1`, o sistema DEVE exigir
   saldo maior ou igual ao valor da mensalidade antes de renovar.
 
+## Verificação automática
+
+`validate_ears.py` falha quando o enunciado:
+- não tem a palavra modal em maiúsculas (`DEVE`, `DEVERÁ`, `SHALL`, `MUST`);
+- não tem o gatilho do seu tipo em maiúsculas (evento: `QUANDO`/`WHEN`; indesejado:
+  `SE` + `ENTÃO` / `IF` + `THEN`; estado: `ENQUANTO`/`WHILE`; opcional: `ONDE`/`WHERE`);
+- contém termo vago da lista do script (ex.: adequado, corretamente, tratar, gerenciar,
+  vários, etc., quando necessário, properly, handle, several).
+
+Texto entre aspas duplas é ignorado, para que mensagens literais do sistema não sejam
+cortadas. Quando um termo da lista for o nome real de algo (ex.: status `TRATADO`), use
+`lint_waivers: [{"term": "tratado", "reason": "nome literal do status no banco"}]`.
+O linter pega o óbvio; o Critic continua responsável pelo resto das regras acima.
+
 ## Campos de cada requisito (`module.json`)
 
 `id`, `ears_type`, `statement`, `sources[]`, `values` (valores concretos),
 `confidence` (`verified|inferred|unknown`), `critic` (`pending|approved|corrected|rejected`),
-`findings[]`, `tags[]`. Ver `schemas/module.schema.json`.
+`findings[]`, `tags[]`, `lint_waivers[]`. Ver `schemas/module.schema.json`.

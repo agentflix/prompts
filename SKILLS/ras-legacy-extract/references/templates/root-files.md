@@ -14,7 +14,7 @@ reverse/
 ├── adapter/               # ADAPTER.md + extratores (Fase 0)
 ├── 00-inventory/          # inventory.json + resumos .md por kind
 ├── 01-database/           # db-metadata.json, tables.md, volumetry.md, indexes.md,
-│                          # triggers.md, sequences.md, views.md, procedures/PRC-*.md
+│                          # triggers.md, sequences.md, views.md, procedures/PRC-<MOD>-NNN.md
 ├── 02-modules/<mod>/      # module.json, README.md, apis.md, rules.md, flows.md, data.md,
 │                          # acceptance.feature, verification-log.md, screens/SCR-*.md|png
 ├── 03-journeys/           # journeys.json + JRN-NN-<slug>.md
@@ -98,6 +98,7 @@ Prioridade de paridade: alta | média | baixa.
 |---|---|---|---|---|
 | FND-001 | bug-suspeito | Filtro de tenant ausente na listagem | backend:apps/x/Y.php:88 | API-LIC-004 |
 ```
+O finding é definido pela linha da tabela que começa com `| FND-NNN |`.
 Tipos: `bug-suspeito`, `quirk`, `codigo-morto`, `dormente`, `divergencia-tela`,
 `validacao-so-front`, `nome-enganoso`, `seguranca`.
 
@@ -115,7 +116,7 @@ Tipos: `bug-suspeito`, `quirk`, `codigo-morto`, `dormente`, `divergencia-tela`,
 - **Já verificado**: <buscas feitas antes de perguntar>
 - **Resposta**: _(pendente)_
 ```
-O arquivo é obrigatório mesmo vazio ("nenhuma pergunta aberta" é uma afirmação).
+A pergunta é definida pelo título `## UNK-NNN`. O arquivo é obrigatório mesmo vazio ("nenhuma pergunta aberta" é uma afirmação).
 
 ## glossary.md
 

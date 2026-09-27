@@ -39,6 +39,10 @@
         "critic": {"$ref": "#critic"},
         "findings": {"type": "array", "items": {"type": "string"}},
         "tags": {"type": "array", "items": {"type": "string"}},
+        "lint_waivers": {"type": "array", "items": {
+          "type": "object", "required": ["term", "reason"],
+          "properties": {"term": {"type": "string", "minLength": 1}, "reason": {"type": "string", "minLength": 10}}
+        }},
         "inventory_keys": {"type": "array", "items": {"type": "string"}}
       }
     }},

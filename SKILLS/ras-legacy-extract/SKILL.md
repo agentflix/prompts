@@ -123,12 +123,15 @@ As fases são uma ordem de pré-requisitos. Cada uma termina com seu gate. Não 
 
 1. Rode as consultas de metadados do adaptador (somente leitura) → `01-database/db-metadata.json`
    (schema: `schemas/db-metadata.schema.json`).
-2. Procedures, triggers, views e generators também viram itens do inventário
-   (`db_procedure`, `db_trigger`, ...) — lógica no banco é regra de negócio.
+2. Todo objeto do `db-metadata.json` também vira item do inventário, com a chave
+   `table:<NOME>`, `view:<NOME>`, `procedure:<NOME>`, `trigger:<NOME>` ou `sequence:<NOME>`
+   — lógica no banco é regra de negócio. O validador de cobertura falha se faltar algum.
 3. Volumetria: linhas por tabela (ou estimativa do engine), com data da medição.
-4. Para cada procedure/trigger com lógica: `01-database/procedures/PRC-<nome>.md` com
-   requisitos EARS citando a fonte `{"repo": "db", "object": "<TIPO> <NOME>", "line": N}`.
-5. **Gate**: schema válido; todos os objetos de banco no inventário.
+4. Para cada procedure/trigger/view com lógica: `01-database/procedures/PRC-<MOD>-NNN.md`
+   (template: `references/templates/procedure.md`). Os requisitos EARS desse objeto ficam no
+   `module.json` do módulo dono, com fonte `{"repo": "db", "object": "<TIPO> <NOME>", "line": N}`.
+5. **Gate**: `validate_schema.py` + `validate_coverage.py --phase inventory` (todos os
+   objetos de banco no inventário).
 
 ### Fase 3 — Extração por módulo (um agente autor por módulo)
 
@@ -207,9 +210,10 @@ python3 $SKILL/scripts/validate/run_all.py --root <...> --module licenciamento
 | Script | Garante |
 |---|---|
 | `validate_schema.py` | JSONs seguem `schemas/` |
-| `validate_ids.py` | IDs únicos, no formato, referências resolvem, JSON ↔ Markdown |
+| `validate_ids.py` | IDs únicos e no formato; toda referência (JSON e qualquer `.md`) resolve, inclusive `FND`, `UNK`, `NFR`, `PRC`, `PAR`; JSON ↔ Markdown |
+| `validate_ears.py` | enunciado com palavra modal, gatilho do tipo EARS e sem termos vagos |
 | `validate_refs.py` | todo `file:line` existe no commit fixado |
-| `validate_coverage.py` | 100% do inventário coberto ou excluído com motivo; controle de contagem |
+| `validate_coverage.py` | 100% do inventário coberto ou excluído com motivo; controle de contagem; todo objeto do banco no inventário |
 | `validate_crosslinks.py` | tela ↔ API ↔ requisito nos dois sentidos |
 
 Gate vermelho = corrigir e rodar de novo. Não perguntar se pode pular.

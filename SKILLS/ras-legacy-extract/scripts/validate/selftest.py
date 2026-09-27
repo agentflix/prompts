@@ -63,7 +63,7 @@ def build(tmp: Path) -> tuple[Path, dict]:
                       "sources": [src], "requirements": ["REQ-ORD-W001"],
                       "confidence": "verified", "critic": "approved"}],
             "requirements": [{"id": "REQ-ORD-W001", "ears_type": "unwanted",
-                              "statement": "SE total <= 0, ENTÃO rejeitar com 422.",
+                              "statement": "SE total <= 0, ENTÃO o sistema DEVE rejeitar com 422.",
                               "sources": [src], "confidence": "verified", "critic": "approved"}],
             "flows": [],
             "screens": [{"id": "SCR-ORD-001", "inventory_key": "screen:/orders/new",
@@ -88,6 +88,26 @@ def build(tmp: Path) -> tuple[Path, dict]:
         "id": "PAR-ORD-001", "api": "API-ORD-001", "requirements": ["REQ-ORD-W001"]}
     (root / "05-parity/cases/PAR-ORD-001.json").write_text(
         json.dumps(files["05-parity/cases/PAR-ORD-001.json"]))
+    (root / "01-database/procedures").mkdir(parents=True)
+    files["01-database/db-metadata.json"] = {
+        "contract_version": "1.0.0", "engine": "test", "extracted_at": "2026-09-27",
+        "tables": [{"name": "ORDERS", "columns": [{"name": "ID", "type": "INTEGER"}]}],
+        "triggers": [{"name": "TRG_ORDERS_BI", "table": "ORDERS"}]}
+    (root / "01-database/db-metadata.json").write_text(json.dumps(files["01-database/db-metadata.json"]))
+    inv = files["00-inventory/inventory.json"]
+    inv["items"].append({"key": "trigger:TRG_ORDERS_BI", "kind": "db_trigger", "module": "orders",
+                         "source": {"repo": "db", "object": "TRIGGER TRG_ORDERS_BI"}})
+    inv["control_counts"].append({"kind": "db_trigger", "command": "select count", "count": 1})
+    (root / "00-inventory/inventory.json").write_text(json.dumps(inv))
+    mod = files["02-modules/orders/module.json"]
+    mod["covers"] = [{"inventory_key": "trigger:TRG_ORDERS_BI", "by": ["PRC-ORD-001"]}]
+    (root / "02-modules/orders/module.json").write_text(json.dumps(mod))
+    (root / "01-database/procedures/PRC-ORD-001.md").write_text(
+        "# PRC-ORD-001\n\n**Objeto**: `TRIGGER TRG_ORDERS_BI`\n\nREQ-ORD-W001\n")
+    (root / "04-nfr").mkdir()
+    (root / "04-nfr/security.md").write_text("| ID | Tema |\n|---|---|\n| NFR-SEC-001 | tenant |\n")
+    (root / "findings.md").write_text("| ID | Tipo |\n|---|---|\n| FND-001 | quirk |\n")
+    (root / "02-modules/orders/README.md").write_text("Ver NFR-SEC-001, FND-001 e PRC-ORD-001.\n")
     return root, files
 
 
@@ -140,6 +160,18 @@ def main() -> int:
             ("caso de paridade aponta para API inexistente",
              "05-parity/cases/PAR-ORD-001.json",
              lambda d: d.update(api="API-ORD-099")),
+            ("termo vago no requisito",
+             "02-modules/orders/module.json",
+             lambda d: d["requirements"][0].update(statement="SE total <= 0, ENTÃO o sistema DEVE tratar o erro.")),
+            ("requisito 'unwanted' sem ENTÃO",
+             "02-modules/orders/module.json",
+             lambda d: d["requirements"][0].update(statement="SE total <= 0, o sistema DEVE rejeitar com 422.")),
+            ("covers.by cita ID inexistente",
+             "02-modules/orders/module.json",
+             lambda d: d["covers"][0].update(by=["PRC-ORD-009"])),
+            ("objeto do banco sem item no inventário",
+             "01-database/db-metadata.json",
+             lambda d: d["triggers"].append({"name": "TRG_NOVO", "table": "ORDERS"})),
             ("módulo verified com critic pending",
              "02-modules/orders/module.json",
              lambda d: d["apis"][0].update(critic="pending")),
@@ -149,6 +181,26 @@ def main() -> int:
             mutate(root, rel, fn)
             results.append(expect(root, False, label))
             (root / rel).write_text(original)
+
+        mutate(root, "02-modules/orders/module.json", lambda d: d["requirements"][0].update(
+            statement="SE total <= 0, ENTÃO o sistema DEVE marcar como TRATADO.",
+            lint_waivers=[{"term": "tratado", "reason": "nome literal do status no banco"}]))
+        results.append(expect(root, True, "waiver justificado libera termo da lista"))
+        (root / "02-modules/orders/module.json").write_text(json.dumps(files["02-modules/orders/module.json"]))
+
+        readme = root / "02-modules/orders/README.md"
+        readme.write_text("Ver NFR-SEC-002.\n")
+        results.append(expect(root, False, "Markdown cita NFR não definido"))
+        readme.write_text("Ver NFR-SEC-001.\n")
+
+        (root / "04-nfr/search.md").write_text("| NFR-SEC-005 | x |\n")
+        results.append(expect(root, False, "NFR definido no arquivo da área errada"))
+        (root / "04-nfr/search.md").unlink()
+
+        prc = root / "01-database/procedures/PRC-ORD-001.md"
+        prc.write_text("# PRC-ORD-001\n\n**Objeto**: `TRIGGER NAO_EXISTE`\n")
+        results.append(expect(root, False, "PRC aponta para objeto fora do db-metadata"))
+        prc.write_text("# PRC-ORD-001\n\n**Objeto**: `TRIGGER TRG_ORDERS_BI`\n")
 
         (root / "02-modules/orders/rules.md").write_text("nada\n")
         results.append(expect(root, False, "ID no JSON ausente do Markdown"))

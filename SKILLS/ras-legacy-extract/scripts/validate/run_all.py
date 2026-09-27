@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import validate_coverage
 import validate_crosslinks
+import validate_ears
 import validate_ids
 import validate_refs
 import validate_schema
@@ -20,6 +21,7 @@ def main(argv: list[str]) -> int:
     reports = [
         validate_schema.run(base),
         validate_ids.run(base),
+        validate_ears.run(base),
         validate_refs.run(base),
         validate_coverage.run(base + (["--write"] if write else [])),
         validate_crosslinks.run(base),

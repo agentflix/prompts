@@ -31,7 +31,9 @@ e o adaptador fica versionado junto com a extração.
    - sem IA dentro do extrator;
    - somente leitura (banco: usuário/conexão read-only sempre que possível);
    - toda linha extraída com `source: {repo, file, line}`;
-   - chave natural estável em `key` (ex.: `GET /licencas/{id}`, `table:CLIENTES`).
+   - chave natural estável em `key` (ex.: `GET /licencas/{id}`); objetos de banco sempre
+     como `table:`, `view:`, `procedure:`, `trigger:`, `sequence:` + nome (ver
+     `id-conventions.md`).
    Preferir parsing estrutural (AST, parser da linguagem) a regex quando disponível.
 
 4. **Escrever `ADAPTER.md`** (template: `templates/adapter.md`): stack detectada, tabela de
