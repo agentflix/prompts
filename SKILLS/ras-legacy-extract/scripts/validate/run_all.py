@@ -6,8 +6,6 @@ Usage:
 """
 from __future__ import annotations
 
-import sys
-
 import validate_coverage
 import validate_crosslinks
 import validate_ids
@@ -32,5 +30,4 @@ def main(argv: list[str]) -> int:
 
 
 if __name__ == "__main__":
-    sys.path.insert(0, __file__.rsplit("/", 1)[0])
     main_wrapper(main)

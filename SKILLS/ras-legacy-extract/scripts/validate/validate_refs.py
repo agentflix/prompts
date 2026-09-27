@@ -7,8 +7,6 @@ from pathlib import Path
 
 from _common import Contract, Report, base_args, finish, iter_sources, main_wrapper
 
-SPECIAL_REPOS = {"db", "runtime"}
-
 
 class RepoReader:
     """Reads file line counts at the pinned commit (git) or from disk (fallback)."""
@@ -42,7 +40,7 @@ class RepoReader:
         if file not in self.cache:
             if self.git:
                 try:
-                    out = subprocess.run(["git", "-C", str(self.path), "show", f"{self.commit}:{file}"],
+                    out = subprocess.run(["git", "-C", str(self.path), "show", f"{self.commit}:./{file}"],
                                          capture_output=True, check=True)
                     self.cache[file] = out.stdout.count(b"\n") + (0 if out.stdout.endswith(b"\n") else 1)
                 except subprocess.CalledProcessError:

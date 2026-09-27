@@ -6,7 +6,7 @@
 **Gatilho**: usuário clica "Renovar" em SCR-LIC-004 (ou job X, ou webhook Y)
 **APIs**: API-LIC-009 · **Regras**: REQ-LIC-S002, REQ-LIC-O001, REQ-LIC-E015
 
-\`\`\`mermaid
+~~~mermaid
 sequenceDiagram
   actor U as Usuário
   participant T as SCR-LIC-004
@@ -26,7 +26,7 @@ sequenceDiagram
     A->>Q: enfileira email de renovação
     A-->>T: 200
   end
-\`\`\`
+~~~
 
 **Falhas e bordas**: <o que acontece se a fila estiver fora, se a integração falhar>
 ```

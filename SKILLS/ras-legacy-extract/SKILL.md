@@ -127,7 +127,7 @@ As fases são uma ordem de pré-requisitos. Cada uma termina com seu gate. Não 
    (`db_procedure`, `db_trigger`, ...) — lógica no banco é regra de negócio.
 3. Volumetria: linhas por tabela (ou estimativa do engine), com data da medição.
 4. Para cada procedure/trigger com lógica: `01-database/procedures/PRC-<nome>.md` com
-   requisitos EARS citando a fonte (`db:<objeto>:<linha>`).
+   requisitos EARS citando a fonte `{"repo": "db", "object": "<TIPO> <NOME>", "line": N}`.
 5. **Gate**: schema válido; todos os objetos de banco no inventário.
 
 ### Fase 3 — Extração por módulo (um agente autor por módulo)

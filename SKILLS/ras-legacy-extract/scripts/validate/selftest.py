@@ -24,13 +24,15 @@ def git(repo: Path, *args: str) -> str:
 
 
 def build(tmp: Path) -> tuple[Path, dict]:
-    repo = tmp / "legacy"
+    # The legacy repo is a subdirectory of a git repository (monorepo case).
+    mono = tmp / "mono"
+    repo = mono / "legacy"
     (repo / "src").mkdir(parents=True)
     (repo / "src" / "Orders.php").write_text("\n".join(f"line {i}" for i in range(1, 51)) + "\n")
-    git(repo, "init", "-q")
-    git(repo, "-c", "user.email=t@t", "-c", "user.name=t", "add", ".")
-    git(repo, "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "init")
-    sha = git(repo, "rev-parse", "HEAD")
+    git(mono, "init", "-q")
+    git(mono, "-c", "user.email=t@t", "-c", "user.name=t", "add", ".")
+    git(mono, "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "init")
+    sha = git(mono, "rev-parse", "HEAD")
 
     root = tmp / "reverse"
     src = {"repo": "backend", "file": "src/Orders.php", "line": 10}
@@ -81,6 +83,11 @@ def build(tmp: Path) -> tuple[Path, dict]:
     (root / "02-modules/orders/rules.md").write_text("## REQ-ORD-W001\n")
     (root / "02-modules/orders/screens").mkdir()
     (root / "02-modules/orders/screens/SCR-ORD-001.md").write_text("# SCR-ORD-001\n")
+    (root / "05-parity/cases").mkdir(parents=True)
+    files["05-parity/cases/PAR-ORD-001.json"] = {
+        "id": "PAR-ORD-001", "api": "API-ORD-001", "requirements": ["REQ-ORD-W001"]}
+    (root / "05-parity/cases/PAR-ORD-001.json").write_text(
+        json.dumps(files["05-parity/cases/PAR-ORD-001.json"]))
     return root, files
 
 
@@ -124,6 +131,15 @@ def main() -> int:
             ("API sem tela e sem no_screen_reason",
              "02-modules/orders/module.json",
              lambda d: d["screens"][0].update(actions=[{"label": "Voltar", "navigates_to": "/"}])),
+            ("nome do módulo diverge do diretório",
+             "02-modules/orders/module.json",
+             lambda d: d["module"].update(name="pedidos")),
+            ("código do módulo diverge do manifest",
+             "manifest.json",
+             lambda d: d["modules"][0].update(code="PED")),
+            ("caso de paridade aponta para API inexistente",
+             "05-parity/cases/PAR-ORD-001.json",
+             lambda d: d.update(api="API-ORD-099")),
             ("módulo verified com critic pending",
              "02-modules/orders/module.json",
              lambda d: d["apis"][0].update(critic="pending")),

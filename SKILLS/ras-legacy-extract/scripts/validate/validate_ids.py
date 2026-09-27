@@ -7,7 +7,7 @@ from pathlib import Path
 
 from _common import (
     ANY_ID_RE, EARS_LETTER, ID_PATTERNS, Contract, Report, base_args, finish, main_wrapper,
-    module_entities,
+    load_json, module_entities,
 )
 
 
@@ -58,6 +58,24 @@ def run(argv: list[str]) -> Report:
             report.fail(f"ID duplicado {jid}")
         registry[jid] = "journeys"
 
+    # Module identity: directory name, module.json and manifest must agree.
+    manifest_mods = c.manifest_modules()
+    for name, mod in c.modules.items():
+        meta = mod.get("module") or {}
+        if meta.get("name") != name:
+            report.fail(f"02-modules/{name}: module.name é {meta.get('name')!r}, esperado {name!r}")
+        if name not in manifest_mods:
+            report.fail(f"02-modules/{name}: módulo não registrado no manifest")
+        elif manifest_mods[name].get("code") != meta.get("code"):
+            report.fail(f"{name}: código {meta.get('code')!r} difere do manifest "
+                        f"{manifest_mods[name].get('code')!r}")
+    codes = [m.get("code") for m in manifest_mods.values()]
+    for dup in sorted({x for x in codes if codes.count(x) > 1}):
+        report.fail(f"manifest: código de módulo duplicado {dup}")
+    repo_names = [r.get("name") for r in (c.manifest or {}).get("repos", [])]
+    for dup in sorted({x for x in repo_names if repo_names.count(x) > 1}):
+        report.fail(f"manifest: repo duplicado {dup}")
+
     findings = _ids_in_markdown(root / "findings.md")
     unknowns = _ids_in_markdown(root / "unknowns.md")
     known = set(registry) | {i for i in findings if i.startswith("FND")} | {
@@ -81,7 +99,7 @@ def run(argv: list[str]) -> Report:
         for ent in mod.get("screens", []) or []:
             for a in ent.get("actions", []) or []:
                 ref(ent.get("id", "?"), a.get("api"))
-                if a.get("navigates_to", "").startswith("SCR-"):
+                if (a.get("navigates_to") or "").startswith("SCR-"):
                     ref(ent.get("id", "?"), a["navigates_to"])
 
         # JSON <-> Markdown parity for the module's own IDs.
@@ -103,6 +121,16 @@ def run(argv: list[str]) -> Report:
                 ref(owner, s.get("api"))
                 for r in s.get("requirements", []) or []:
                     ref(owner, r)
+
+        # Parity cases: file name == id, references resolve.
+        for case in sorted((root / "05-parity" / "cases").glob("*.json")):
+            data = load_json(case, report) or {}
+            cid = data.get("id", "")
+            if not ID_PATTERNS["PAR"].match(cid) or case.stem != cid:
+                report.fail(f"05-parity/cases/{case.name}: id {cid!r} inválido ou diferente do nome do arquivo")
+            ref(cid or case.name, data.get("api"))
+            for r in data.get("requirements", []) or []:
+                ref(cid or case.name, r)
 
     # Inventory keys must be unique.
     seen: set[str] = set()

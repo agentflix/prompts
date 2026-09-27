@@ -14,9 +14,9 @@ rejeitar com HTTP 422 e a mensagem "Data de vencimento inválida".
 **Fonte**: `backend:apps/.../LicencaValidator.php:88-93`
 
 **Evidência** (trecho curto, sem segredos):
-\`\`\`
+~~~
 if ($vencimento < new DateTime()) { throw new ValidationException('Data de vencimento inválida'); }
-\`\`\`
+~~~
 
 **Valores concretos**: comparação estrita `<` com data e hora atuais do servidor.
 **Confiança**: ✅ verified (código + PAR-LIC-003) · **Critic**: approved

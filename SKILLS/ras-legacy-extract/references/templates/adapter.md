@@ -27,9 +27,9 @@ Gerado na Fase 0 por ras-legacy-extract. Commit: backend `<sha>`, frontend `<sha
 Regra usada para decidir o `module` de cada item (ex.: pasta, prefixo de rota, tabela dona).
 
 ## Como rodar
-\`\`\`bash
+~~~bash
 python3 adapter/extract_inventory.py > 00-inventory/inventory.json
-\`\`\`
+~~~
 
 ## Limitações conhecidas
 - <o que o extrator não consegue ver e como isso é compensado>
