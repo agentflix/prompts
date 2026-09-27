@@ -1,5 +1,7 @@
 # Template — screens/SCR-<MOD>-NNN.md
 
+> **Gerado por `scripts/render_md.py`.** Este template mostra o formato de saída e de onde vem cada parte; o autor preenche o JSON (`module.json` / `journeys.json`), nunca o `.md`.
+
 ```markdown
 # SCR-LIC-002 — Nova licença
 

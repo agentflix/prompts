@@ -8,6 +8,10 @@ Checks, per requirement:
   optional: ONDE/WHERE);
 - has no vague term (pt-BR and English list below).
 
+Warnings (do not fail the gate): more than one modal keyword, statement longer than
+MAX_LEN characters, an enumeration of numbers inside the statement, or short free-text
+fields (API summary, screen purpose/menu, action result/precondition) above TEXT_LIMITS.
+
 Quoted text ("..." and “...”) is ignored, so literal error messages are not linted.
 A term may be waived per requirement with `lint_waivers: [{"term": ..., "reason": ...}]`.
 """
@@ -42,6 +46,24 @@ VAGUE = [(t, re.compile(rf"(?<!\w){t}(?!\w)", re.IGNORECASE)) for t in VAGUE_TER
 QUOTED = re.compile(r"\"[^\"]*\"|“[^”]*”")
 
 
+MODAL_ALL = re.compile(r"\b(DEVE|DEVERÁ|SHALL|MUST)\b")
+NUMBER = re.compile(r"\b\d+\b")
+MAX_LEN = 300
+
+
+def size_warnings(statement: str) -> list[str]:
+    """Signals of a compound requirement or an enumeration inside the statement."""
+    text = QUOTED.sub(" ", statement)
+    out: list[str] = []
+    if len(MODAL_ALL.findall(text)) > 1:
+        out.append("mais de um DEVE/SHALL: provavelmente são requisitos separados")
+    if len(statement) > MAX_LEN:
+        out.append(f"{len(statement)} caracteres (> {MAX_LEN}): avalie dividir")
+    if len(NUMBER.findall(text)) >= 6:
+        out.append("muitos números no enunciado: mova a enumeração para `values` e cite-a")
+    return out
+
+
 def lint(statement: str, ears_type: str, waived: set[str]) -> list[str]:
     text = QUOTED.sub(" ", statement)
     problems: list[str] = []
@@ -57,6 +79,32 @@ def lint(statement: str, ears_type: str, waived: set[str]) -> list[str]:
     return problems
 
 
+# Short free-text fields: longer text usually means two facts in one field.
+TEXT_LIMITS = {("apis", "summary"): 100, ("screens", "purpose"): 200, ("screens", "menu"): 120,
+               ("actions", "result"): 200, ("actions", "precondition"): 120}
+
+
+def brevity_warnings(mod: dict) -> list[str]:
+    out: list[str] = []
+
+    def check(owner: str, kind: str, field: str, value: object) -> None:
+        limit = TEXT_LIMITS[(kind, field)]
+        if isinstance(value, str) and len(value) > limit:
+            out.append(f"{owner}.{field}: {len(value)} caracteres (> {limit}); seja direto e mova "
+                       "detalhes para notes/regras")
+
+    for api in mod.get("apis", []) or []:
+        check(api.get("id", "?"), "apis", "summary", api.get("summary"))
+    for scr in mod.get("screens", []) or []:
+        check(scr.get("id", "?"), "screens", "purpose", scr.get("purpose"))
+        check(scr.get("id", "?"), "screens", "menu", scr.get("menu"))
+        for a in scr.get("actions", []) or []:
+            owner = f"{scr.get('id')}[{a.get('label')}]"
+            check(owner, "actions", "result", a.get("result"))
+            check(owner, "actions", "precondition", a.get("precondition"))
+    return out
+
+
 def run(argv: list[str]) -> Report:
     args = base_args("Lint dos enunciados EARS").parse_args(argv)
     report = Report("ears")
@@ -68,8 +116,13 @@ def run(argv: list[str]) -> Report:
                 if len(str(w.get("reason", ""))) < 10:
                     report.fail(f"{req.get('id')}: waiver de '{w.get('term')}' sem motivo")
             waived = {str(w.get("term", "")).lower() for w in waivers}
-            for problem in lint(str(req.get("statement", "")), str(req.get("ears_type", "")), waived):
+            statement = str(req.get("statement", ""))
+            for problem in lint(statement, str(req.get("ears_type", "")), waived):
                 report.fail(f"{req.get('id')}: {problem}")
+            for hint in size_warnings(statement):
+                report.warn(f"{req.get('id')}: {hint}")
+        for hint in brevity_warnings(c.modules[name]):
+            report.warn(hint)
     return report
 
 

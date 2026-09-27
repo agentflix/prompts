@@ -11,6 +11,7 @@ import validate_crosslinks
 import validate_ears
 import validate_ids
 import validate_refs
+import validate_rendered
 import validate_schema
 from _common import finish, main_wrapper
 
@@ -25,6 +26,7 @@ def main(argv: list[str]) -> int:
         validate_refs.run(base),
         validate_coverage.run(base + (["--write"] if write else [])),
         validate_crosslinks.run(base),
+        validate_rendered.run(base),
     ]
     code = finish(reports)
     print("\nGATE:", "VERDE" if code == 0 else "VERMELHO")

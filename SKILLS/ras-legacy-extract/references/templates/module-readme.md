@@ -1,5 +1,7 @@
 # Template — 02-modules/<mod>/README.md
 
+> **Gerado por `scripts/render_md.py`.** Este template mostra o formato de saída e de onde vem cada parte; o autor preenche o JSON (`module.json` / `journeys.json`), nunca o `.md`.
+
 ```markdown
 # Módulo <nome> (<CODE>)
 
@@ -41,7 +43,7 @@ Código descrito: `<caminho do módulo>` (commit `<sha>`). Status: <status>.
 ```
 Ausência de filtro de tenant em dado multi-tenant → `NFR-SEC-*` + `FND-*`.
 
-## acceptance.feature
+## acceptance.feature (escrito à mão, não é gerado)
 
 Um cenário Gherkin por requisito relevante, com o ID na tag:
 

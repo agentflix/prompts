@@ -1,5 +1,7 @@
 # Template — 03-journeys/JRN-NN-<slug>.md
 
+> **Gerado por `scripts/render_md.py`.** Este template mostra o formato de saída e de onde vem cada parte; o autor preenche o JSON (`module.json` / `journeys.json`), nunca o `.md`.
+
 ```markdown
 # JRN-03 — Franqueado emite uma licença nova
 

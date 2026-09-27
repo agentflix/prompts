@@ -14,7 +14,7 @@ description: >-
 license: CC-BY-4.0
 metadata:
   author: Rafael Silva
-  version: '1.1.0'
+  version: '1.2.0'
   contract_version: '1.1.0'
 ---
 
@@ -90,8 +90,26 @@ reverse/
 └── 05-parity/          # Fase 7 — casos de caracterização (request/response reais)
 ```
 
-**JSON é a fonte da verdade; Markdown é a leitura humana.** Todo ID presente num
-`module.json` precisa aparecer nos `.md` do módulo, e vice-versa (o validador confere).
+**O autor escreve só JSON; o Markdown é gerado.** `scripts/render_md.py` gera, a partir do
+`module.json` e do `journeys.json`, os arquivos `README.md`, `apis.md`, `rules.md`,
+`flows.md`, `data.md`, `screens/SCR-*.md` e `03-journeys/JRN-*.md`. Esses arquivos nunca
+são editados à mão: o validador falha se estiverem diferentes do que o script gera.
+Ficam escritos à mão: `acceptance.feature`, `verification-log.md`, `01-database/*.md`,
+`04-nfr/`, `findings.md`, `unknowns.md`, `glossary.md` e `decisions-v2.md`.
+
+## Estilo: completo, não prolixo
+
+- **Cada fato uma vez.** O que é derivável não se escreve: "chamada por" é calculado a
+  partir das telas e jornadas, e as contagens do README são calculadas.
+- **Um comportamento por requisito.** Mais de um `DEVE`, ou mais de ~300 caracteres, é
+  sinal de requisitos separados (o linter avisa).
+- **Enumerações ficam em `values`.** O enunciado cita ("com os códigos de `values.grupos`"),
+  não lista.
+- **Campos curtos são curtos.** `summary` de API ≤ 100 caracteres; `purpose` ≤ 200;
+  `menu` ≤ 120; `result` de ação ≤ 200 (o linter avisa). Explicação longa vai para `notes`
+  da tela, para `attention` do módulo ou vira requisito.
+- **Sem narrativa do processo.** O documento descreve o sistema; como a extração foi feita
+  fica no `manifest.json` e no `verification-log.md`.
 
 ## Fases
 
@@ -138,8 +156,10 @@ As fases são uma ordem de pré-requisitos. Cada uma termina com seu gate. Não 
 
 ### Fase 3 — Extração por módulo (um agente autor por módulo)
 
-Para cada módulo, na ordem de dependência (núcleo primeiro), o autor produz
-`02-modules/<mod>/module.json` (schema: `schemas/module.schema.json`) e os `.md`:
+Para cada módulo, na ordem de dependência (núcleo primeiro), o autor escreve
+`02-modules/<mod>/module.json` (schema: `schemas/module.schema.json`) e depois roda
+`python3 $SKILL/scripts/render_md.py --root <reverse> --module <mod>` para gerar os `.md`.
+O conteúdo de cada parte:
 
 - **APIs** (`apis.md`): contrato completo de cada endpoint — método, path, autenticação e
   permissão, **todos os parâmetros** (`params[]`: nome, onde, tipo, obrigatório, validação),
@@ -148,8 +168,8 @@ Para cada módulo, na ordem de dependência (núcleo primeiro), o autor produz
   usa `params: []`. Template: `references/templates/api.md`.
 - **Regras** (`rules.md`): requisitos EARS com fonte, valores concretos e confiança.
   Ver `references/ears.md` e `references/evidence-and-confidence.md`.
-- **Fluxos** (`flows.md`): um diagrama Mermaid por caso de uso, com side-effects (email,
-  fila, HTTP externo, arquivo). Template: `references/templates/flow.md`.
+- **Fluxos** (`flows.md`): um diagrama Mermaid por caso de uso em `flows[].diagram`, com
+  `trigger` e `edge_cases`, e side-effects (email, fila, HTTP externo, arquivo). Template: `references/templates/flow.md`.
 - **Dados** (`data.md`): tabelas lidas/escritas, filtro de tenant presente ou ausente.
 - **Telas** (`screens/SCR-*.md`): objetivo (`purpose`), menu de origem, campos, ações,
   navegação, perfil. **Toda ação tem `result`**: o que o usuário vê depois (mensagem literal,
@@ -197,7 +217,8 @@ marcou como crítico em `decisions-v2.md`.
 
 ### Fase 8 — Consolidação e gate final
 
-1. Gere `README.md` (índice), `glossary.md`, `coverage.md` (`validate_coverage.py --write`).
+1. Rode `render_md.py --root <reverse>` (todos os módulos e jornadas). Gere o `README.md` da
+   raiz (índice), `glossary.md` e `coverage.md` (`validate_coverage.py --write`).
 2. Preencha `decisions-v2.md` com todos os módulos e requisitos, coluna `v2` vazia
    (`manter | reescrever | descartar`) para o usuário decidir.
 3. **Gate final**: `python3 scripts/validate/run_all.py --root <reverse>` verde.
@@ -222,6 +243,10 @@ python3 $SKILL/scripts/validate/run_all.py --root <...> --module licenciamento
 | `validate_refs.py` | todo `file:line` existe no commit fixado |
 | `validate_coverage.py` | 100% do inventário coberto ou excluído com motivo; controle de contagem; todo objeto do banco no inventário |
 | `validate_crosslinks.py` | tela ↔ API ↔ requisito nos dois sentidos |
+| `validate_rendered.py` | Markdown gerado em dia com o JSON (ninguém editou à mão) |
+
+Avisos (não bloqueiam): requisito composto ou longo, enumeração no enunciado, campos curtos
+acima do limite. Trate-os antes do Critic; ignore só com motivo.
 
 Gate vermelho = corrigir e rodar de novo. Não perguntar se pode pular.
 
@@ -236,6 +261,7 @@ Todo JSON da saída tem `contract_version`, e o validador exige a versão atual 
 |---|---|---|
 | 1.0.0 | versão inicial | — |
 | 1.1.0 | APIs com `params[]` e `responses[]`; telas com `purpose`; ações com `result`; passos de jornada com `result`; `approvals.adapter` no manifest | completar os campos novos (refazer Fase 3 + Critic dos módulos), pedir a aprovação do adaptador, trocar `contract_version` para `1.1.0` em todos os JSON |
+| 1.1.0 (skill 1.2.0) | Markdown gerado por `render_md.py`; campos opcionais para o que antes só existia no `.md`: `module.summary/depends_on/used_by/attention`, `flows[].trigger/diagram/edge_cases`, `screens[].notes/screenshot`, `data[].note`, `journeys[].slug/alternatives/parity_cases` | **antes** de rodar o script, mover para o JSON todo conteúdo que só existe nos `.md` (diagramas, observações, pontos de atenção, campo na API); depois rodar `render_md.py` e conferir o diff |
 
 ## Orquestração (sistemas grandes)
 

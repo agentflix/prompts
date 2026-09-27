@@ -1,5 +1,7 @@
 # Template — apis.md (uma seção por API)
 
+> **Gerado por `scripts/render_md.py`.** Este template mostra o formato de saída e de onde vem cada parte; o autor preenche o JSON (`module.json` / `journeys.json`), nunca o `.md`.
+
 As tabelas **Parâmetros** e **Respostas** são obrigatórias em toda API e espelham
 `params[]` e `responses[]` do `module.json`. Respostas incluem redirects (302 + destino) e
 páginas renderizadas em caso de erro (200 + qual tela/mensagem). Sem parâmetros: escreva

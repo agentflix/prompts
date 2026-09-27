@@ -17,6 +17,9 @@ sys.path.insert(0, str(HERE))
 
 import run_all  # noqa: E402
 
+sys.path.insert(0, str(HERE.parent))
+import render_md  # noqa: E402
+
 
 def git(repo: Path, *args: str) -> str:
     return subprocess.run(["git", "-C", str(repo), *args], capture_output=True, text=True,
@@ -85,10 +88,6 @@ def build(tmp: Path) -> tuple[Path, dict]:
         p = root / rel
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(json.dumps(data, ensure_ascii=False, indent=2))
-    (root / "02-modules/orders/apis.md").write_text("## API-ORD-001\n")
-    (root / "02-modules/orders/rules.md").write_text("## REQ-ORD-W001\n")
-    (root / "02-modules/orders/screens").mkdir()
-    (root / "02-modules/orders/screens/SCR-ORD-001.md").write_text("# SCR-ORD-001\n")
     (root / "05-parity/cases").mkdir(parents=True)
     files["05-parity/cases/PAR-ORD-001.json"] = {
         "id": "PAR-ORD-001", "api": "API-ORD-001", "requirements": ["REQ-ORD-W001"]}
@@ -107,14 +106,19 @@ def build(tmp: Path) -> tuple[Path, dict]:
     (root / "00-inventory/inventory.json").write_text(json.dumps(inv))
     mod = files["02-modules/orders/module.json"]
     mod["covers"] = [{"inventory_key": "trigger:TRG_ORDERS_BI", "by": ["PRC-ORD-001"]}]
+    mod["module"]["attention"] = ["Ver NFR-SEC-001, FND-001 e PRC-ORD-001."]
     (root / "02-modules/orders/module.json").write_text(json.dumps(mod))
     (root / "01-database/procedures/PRC-ORD-001.md").write_text(
         "# PRC-ORD-001\n\n**Objeto**: `TRIGGER TRG_ORDERS_BI`\n\nREQ-ORD-W001\n")
     (root / "04-nfr").mkdir()
     (root / "04-nfr/security.md").write_text("| ID | Tema |\n|---|---|\n| NFR-SEC-001 | tenant |\n")
     (root / "findings.md").write_text("| ID | Tipo |\n|---|---|\n| FND-001 | quirk |\n")
-    (root / "02-modules/orders/README.md").write_text("Ver NFR-SEC-001, FND-001 e PRC-ORD-001.\n")
+    render(root)
     return root, files
+
+
+def render(root: Path) -> None:
+    assert render_md.main(["--root", str(root)]) == 0
 
 
 def expect(root: Path, want_ok: bool, label: str) -> bool:
@@ -210,13 +214,21 @@ def main() -> int:
         mutate(root, "02-modules/orders/module.json", lambda d: d["requirements"][0].update(
             statement="SE total <= 0, ENTÃO o sistema DEVE marcar como TRATADO.",
             lint_waivers=[{"term": "tratado", "reason": "nome literal do status no banco"}]))
+        render(root)
         results.append(expect(root, True, "waiver justificado libera termo da lista"))
         (root / "02-modules/orders/module.json").write_text(json.dumps(files["02-modules/orders/module.json"]))
+        render(root)
 
-        readme = root / "02-modules/orders/README.md"
-        readme.write_text("Ver NFR-SEC-002.\n")
+        apis_md = root / "02-modules/orders/apis.md"
+        original_md = apis_md.read_text()
+        apis_md.write_text(original_md + "\nEditado à mão.\n")
+        results.append(expect(root, False, "Markdown gerado editado à mão"))
+        apis_md.write_text(original_md)
+
+        glossary = root / "glossary.md"
+        glossary.write_text("Ver NFR-SEC-002.\n")
         results.append(expect(root, False, "Markdown cita NFR não definido"))
-        readme.write_text("Ver NFR-SEC-001.\n")
+        glossary.unlink()
 
         (root / "04-nfr/search.md").write_text("| NFR-SEC-005 | x |\n")
         results.append(expect(root, False, "NFR definido no arquivo da área errada"))
