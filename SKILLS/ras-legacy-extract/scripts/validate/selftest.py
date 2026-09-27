@@ -38,13 +38,14 @@ def build(tmp: Path) -> tuple[Path, dict]:
     src = {"repo": "backend", "file": "src/Orders.php", "line": 10}
     files = {
         "manifest.json": {
-            "contract_version": "1.0.0", "system": "demo", "language": "pt-BR", "has_frontend": True,
+            "contract_version": "1.1.0", "system": "demo", "language": "pt-BR", "has_frontend": True,
             "repos": [{"name": "backend", "path": str(repo), "commit": sha}],
             "modules": [{"code": "ORD", "name": "orders", "status": "verified"}],
-            "phases": {"0": {"status": "done"}},
+            "phases": {"0": {"status": "done"}, "1": {"status": "done"}},
+            "approvals": {"adapter": {"by": "Tester", "date": "2026-09-27"}},
         },
         "00-inventory/inventory.json": {
-            "contract_version": "1.0.0", "generated_at": "2026-09-27", "generator": "test",
+            "contract_version": "1.1.0", "generated_at": "2026-09-27", "generator": "test",
             "items": [
                 {"key": "POST /orders", "kind": "http_endpoint", "module": "orders", "source": src},
                 {"key": "screen:/orders/new", "kind": "screen", "module": "orders", "source": src},
@@ -57,9 +58,12 @@ def build(tmp: Path) -> tuple[Path, dict]:
             ],
         },
         "02-modules/orders/module.json": {
-            "contract_version": "1.0.0", "module": {"code": "ORD", "name": "orders"},
+            "contract_version": "1.1.0", "module": {"code": "ORD", "name": "orders"},
             "apis": [{"id": "API-ORD-001", "inventory_key": "POST /orders", "method": "POST",
                       "path": "/orders", "auth": "logged user", "summary": "create order",
+                      "params": [{"name": "total", "in": "body", "type": "decimal", "required": True}],
+                      "responses": [{"status": 201, "when": "sucesso"},
+                                    {"status": 422, "when": "total <= 0", "requirements": ["REQ-ORD-W001"]}],
                       "sources": [src], "requirements": ["REQ-ORD-W001"],
                       "confidence": "verified", "critic": "approved"}],
             "requirements": [{"id": "REQ-ORD-W001", "ears_type": "unwanted",
@@ -67,9 +71,11 @@ def build(tmp: Path) -> tuple[Path, dict]:
                               "sources": [src], "confidence": "verified", "critic": "approved"}],
             "flows": [],
             "screens": [{"id": "SCR-ORD-001", "inventory_key": "screen:/orders/new",
-                         "route": "/orders/new", "title": "Nova ordem", "sources": [src],
+                         "route": "/orders/new", "title": "Nova ordem",
+                         "purpose": "Cadastrar uma nova ordem de venda", "sources": [src],
                          "fields": [{"label": "Total", "type": "number", "required": True}],
-                         "actions": [{"label": "Salvar", "api": "API-ORD-001"}]}],
+                         "actions": [{"label": "Salvar", "api": "API-ORD-001",
+                                      "result": "mostra 'Ordem criada' e volta para a lista"}]}],
             "data": [{"inventory_key": "table:ORDERS", "table": "ORDERS", "access": "RW",
                       "tenant_filtered": True, "sources": [src]}],
             "exclusions": [],
@@ -90,7 +96,7 @@ def build(tmp: Path) -> tuple[Path, dict]:
         json.dumps(files["05-parity/cases/PAR-ORD-001.json"]))
     (root / "01-database/procedures").mkdir(parents=True)
     files["01-database/db-metadata.json"] = {
-        "contract_version": "1.0.0", "engine": "test", "extracted_at": "2026-09-27",
+        "contract_version": "1.1.0", "engine": "test", "extracted_at": "2026-09-27",
         "tables": [{"name": "ORDERS", "columns": [{"name": "ID", "type": "INTEGER"}]}],
         "triggers": [{"name": "TRG_ORDERS_BI", "table": "ORDERS"}]}
     (root / "01-database/db-metadata.json").write_text(json.dumps(files["01-database/db-metadata.json"]))
@@ -150,7 +156,26 @@ def main() -> int:
              lambda d: d["requirements"][0].update(ears_type="event")),
             ("API sem tela e sem no_screen_reason",
              "02-modules/orders/module.json",
-             lambda d: d["screens"][0].update(actions=[{"label": "Voltar", "navigates_to": "/"}])),
+             lambda d: d["screens"][0].update(actions=[{"label": "Voltar", "navigates_to": "/",
+                                                        "result": "volta ao início"}])),
+            ("API sem respostas",
+             "02-modules/orders/module.json",
+             lambda d: d["apis"][0].update(responses=[])),
+            ("API sem params",
+             "02-modules/orders/module.json",
+             lambda d: d["apis"][0].pop("params")),
+            ("ação de tela sem resultado",
+             "02-modules/orders/module.json",
+             lambda d: d["screens"][0]["actions"][0].pop("result")),
+            ("tela sem objetivo",
+             "02-modules/orders/module.json",
+             lambda d: d["screens"][0].pop("purpose")),
+            ("fase 1 concluída sem aprovação do adaptador",
+             "manifest.json",
+             lambda d: d.pop("approvals")),
+            ("contract_version antigo",
+             "02-modules/orders/module.json",
+             lambda d: d.update(contract_version="1.0.0")),
             ("nome do módulo diverge do diretório",
              "02-modules/orders/module.json",
              lambda d: d["module"].update(name="pedidos")),

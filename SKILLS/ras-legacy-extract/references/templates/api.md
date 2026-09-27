@@ -1,5 +1,10 @@
 # Template — apis.md (uma seção por API)
 
+As tabelas **Parâmetros** e **Respostas** são obrigatórias em toda API e espelham
+`params[]` e `responses[]` do `module.json`. Respostas incluem redirects (302 + destino) e
+páginas renderizadas em caso de erro (200 + qual tela/mensagem). Sem parâmetros: escreva
+"Sem parâmetros" e use `params: []`.
+
 ```markdown
 ## API-LIC-007 — Criar licença
 `POST /licencas` · ✅ verified · Critic: approved
@@ -14,10 +19,11 @@
 | aplicativo_id | body | int | sim | existe e ativo | |
 
 ### Respostas
-| Status | Quando | Corpo |
-|---|---|---|
-| 201 | sucesso | `{id, ...}` |
-| 422 | vencimento no passado | `{"erro": "Data de vencimento inválida"}` |
+| Status | Quando | Corpo / destino | Mensagem literal | Regras |
+|---|---|---|---|---|
+| 201 | sucesso | `{id, ...}` | "Licença criada" | REQ-LIC-E012 |
+| 422 | vencimento no passado | `{"erro": ...}` | "Data de vencimento inválida" | REQ-LIC-W003 |
+| 302 | sessão expirada | `/login` | — | REQ-AUTH-W002 |
 
 ### Regras aplicadas
 REQ-LIC-E012, REQ-LIC-W003, REQ-LIC-O001

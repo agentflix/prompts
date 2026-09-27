@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 from typing import Any, Iterator
 
+CONTRACT_VERSION = "1.1.0"
 SKILL_DIR = Path(__file__).resolve().parents[2]
 SCHEMAS_DIR = SKILL_DIR / "schemas"
 

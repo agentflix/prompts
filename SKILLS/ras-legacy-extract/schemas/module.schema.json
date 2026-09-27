@@ -10,7 +10,7 @@
     },
     "apis": {"type": "array", "items": {
       "type": "object",
-      "required": ["id", "inventory_key", "method", "path", "auth", "summary", "sources", "requirements", "confidence", "critic"],
+      "required": ["id", "inventory_key", "method", "path", "auth", "summary", "params", "responses", "sources", "requirements", "confidence", "critic"],
       "properties": {
         "id": {"type": "string", "pattern": "^API-[A-Z0-9]{2,6}-\\d{3}$"},
         "inventory_key": {"type": "string"},
@@ -18,6 +18,27 @@
         "path": {"type": "string"},
         "auth": {"type": "string", "minLength": 1},
         "summary": {"type": "string", "minLength": 1},
+        "params": {"type": "array", "items": {
+          "type": "object", "required": ["name", "in", "type", "required"],
+          "properties": {
+            "name": {"type": "string", "minLength": 1},
+            "in": {"type": "string", "enum": ["path", "query", "body", "form", "header", "cookie", "session"]},
+            "type": {"type": "string", "minLength": 1},
+            "required": {"type": ["boolean", "string"]},
+            "validation": {"type": "string"},
+            "description": {"type": "string"}
+          }
+        }},
+        "responses": {"type": "array", "minItems": 1, "items": {
+          "type": "object", "required": ["status", "when"],
+          "properties": {
+            "status": {"type": ["integer", "string"]},
+            "when": {"type": "string", "minLength": 3},
+            "body": {"type": "string"},
+            "message": {"type": "string"},
+            "requirements": {"type": "array", "items": {"type": "string"}}
+          }
+        }},
         "sources": {"$ref": "#sources"},
         "requirements": {"type": "array", "items": {"type": "string"}},
         "side_effects": {"type": "array", "items": {"type": "string"}},
@@ -57,12 +78,14 @@
       }
     }},
     "screens": {"type": "array", "items": {
-      "type": "object", "required": ["id", "inventory_key", "route", "title", "sources", "fields", "actions"],
+      "type": "object", "required": ["id", "inventory_key", "route", "title", "purpose", "sources", "fields", "actions"],
       "properties": {
         "id": {"type": "string", "pattern": "^SCR-[A-Z0-9]{2,6}-\\d{3}$"},
         "inventory_key": {"type": "string"},
         "route": {"type": "string"},
         "title": {"type": "string"},
+        "purpose": {"type": "string", "minLength": 10},
+        "menu": {"type": "string"},
         "profiles": {"type": "array", "items": {"type": "string"}},
         "sources": {"$ref": "#sources"},
         "fields": {"type": "array", "items": {
@@ -76,10 +99,11 @@
           }
         }},
         "actions": {"type": "array", "items": {
-          "type": "object", "required": ["label"],
+          "type": "object", "required": ["label", "result"],
           "properties": {
             "label": {"type": "string"}, "api": {"type": "string"}, "external_call": {"type": "string"},
-            "precondition": {"type": "string"}, "result": {"type": "string"}, "navigates_to": {"type": "string"}
+            "precondition": {"type": "string"}, "result": {"type": "string", "minLength": 3},
+            "messages": {"type": "array", "items": {"type": "string"}}, "navigates_to": {"type": "string"}
           }
         }},
         "confidence": {"$ref": "#confidence"},

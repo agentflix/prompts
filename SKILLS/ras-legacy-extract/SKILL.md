@@ -14,8 +14,8 @@ description: >-
 license: CC-BY-4.0
 metadata:
   author: Rafael Silva
-  version: '1.0.0'
-  contract_version: '1.0.0'
+  version: '1.1.0'
+  contract_version: '1.1.0'
 ---
 
 # ras-legacy-extract — extrair o legado sem esquecer nada
@@ -105,8 +105,11 @@ As fases são uma ordem de pré-requisitos. Cada uma termina com seu gate. Não 
 2. Crie `manifest.json` com os commits fixados (`git rev-parse HEAD` de cada repo).
 3. Detecte a stack e **gere o adaptador** em `reverse/adapter/` seguindo
    `references/phase-0-adapter.md` e `references/surfaces-checklist.md`.
-4. **Gate**: `ADAPTER.md` lista TODAS as superfícies do checklist — com extrator ou com
-   justificativa de "não existe neste sistema". O usuário revisa e aprova antes da Fase 1.
+4. **Gate humano**: `ADAPTER.md` lista TODAS as superfícies do checklist — com extrator ou
+   com justificativa de "não existe neste sistema". Apresente ao usuário e **pare**. Só com a
+   aprovação explícita registre `approvals.adapter = {"by": "<nome>", "date": "<AAAA-MM-DD>"}`
+   no `manifest.json`. Sem esse registro o validador bloqueia qualquer fase ≥ 1. Nunca
+   preencha a aprovação por conta própria.
 
 ### Fase 1 — Inventário (script, sem IA)
 
@@ -139,15 +142,18 @@ Para cada módulo, na ordem de dependência (núcleo primeiro), o autor produz
 `02-modules/<mod>/module.json` (schema: `schemas/module.schema.json`) e os `.md`:
 
 - **APIs** (`apis.md`): contrato completo de cada endpoint — método, path, autenticação e
-  permissão, parâmetros, validações, resposta, erros, side-effects. Template:
-  `references/templates/api.md`.
+  permissão, **todos os parâmetros** (`params[]`: nome, onde, tipo, obrigatório, validação),
+  **todas as respostas** (`responses[]`: status, quando, corpo, mensagem literal, requisitos),
+  incluindo redirects e páginas de erro renderizadas, e side-effects. Endpoint sem parâmetro
+  usa `params: []`. Template: `references/templates/api.md`.
 - **Regras** (`rules.md`): requisitos EARS com fonte, valores concretos e confiança.
   Ver `references/ears.md` e `references/evidence-and-confidence.md`.
 - **Fluxos** (`flows.md`): um diagrama Mermaid por caso de uso, com side-effects (email,
   fila, HTTP externo, arquivo). Template: `references/templates/flow.md`.
 - **Dados** (`data.md`): tabelas lidas/escritas, filtro de tenant presente ou ausente.
-- **Telas** (`screens/SCR-*.md`): campos, ações, navegação, perfil. Fonte primária: código do
-  frontend. Template: `references/templates/screen.md`; captura: `references/ui-capture.md`.
+- **Telas** (`screens/SCR-*.md`): objetivo (`purpose`), menu de origem, campos, ações,
+  navegação, perfil. **Toda ação tem `result`**: o que o usuário vê depois (mensagem literal,
+  tela seguinte, download, modal que fecha). Fonte primária: código do frontend. Template: `references/templates/screen.md`; captura: `references/ui-capture.md`.
 - **Exclusões**: item do inventário que não entra (código morto, dormente) vai em
   `exclusions` com a evidência da busca que prova (ver "Vivo ou morto" em
   `references/evidence-and-confidence.md`).
@@ -165,7 +171,8 @@ requisito, confere se o módulo cobre 100% dos itens do inventário dele, e regi
 
 1. Jornadas ponta a ponta "como o usuário faz X", cruzando módulos:
    `03-journeys/journeys.json` + `JRN-*.md` (template: `references/templates/journey.md`).
-   Cada passo liga tela → ação → API → requisitos.
+   Cada passo liga tela → ação → API → requisitos → **resultado** (`result`); a jornada tem
+   `preconditions`.
 2. Se houver navegador disponível: valide as telas extraídas do código contra a aplicação
    rodando (campos visíveis, obrigatórios, chamadas de rede). Divergência vira finding.
 3. **Gate**: `validate_crosslinks.py` — toda API é chamada por alguma tela ou tem
@@ -220,6 +227,15 @@ Gate vermelho = corrigir e rodar de novo. Não perguntar se pode pular.
 
 Ao alterar os validadores, rode `python3 $SKILL/scripts/validate/selftest.py` (fixture
 válida precisa passar e cada quebra conhecida precisa falhar pelo motivo certo).
+
+## Versões do contrato
+
+Todo JSON da saída tem `contract_version`, e o validador exige a versão atual da skill.
+
+| Versão | Mudança | Migrar uma saída antiga |
+|---|---|---|
+| 1.0.0 | versão inicial | — |
+| 1.1.0 | APIs com `params[]` e `responses[]`; telas com `purpose`; ações com `result`; passos de jornada com `result`; `approvals.adapter` no manifest | completar os campos novos (refazer Fase 3 + Critic dos módulos), pedir a aprovação do adaptador, trocar `contract_version` para `1.1.0` em todos os JSON |
 
 ## Orquestração (sistemas grandes)
 

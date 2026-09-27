@@ -4,7 +4,7 @@
 # JRN-03 — Franqueado emite uma licença nova
 
 **Ator**: franqueado · **Módulos**: pessoas, licenciamento, email
-**Pré-condições**: cliente cadastrado; franquia ativa
+**Pré-condições** (obrigatório, `preconditions`): cliente cadastrado; franquia ativa
 
 | # | Tela | O que o usuário faz | API | Regras | Resultado |
 |---|---|---|---|---|---|
@@ -16,4 +16,4 @@
 **Casos de paridade**: PAR-LIC-001
 ```
 
-Mesmo conteúdo em `journeys.json` (schema `journeys.schema.json`).
+Mesmo conteúdo em `journeys.json` (schema `journeys.schema.json`). Todo passo tem `result`.

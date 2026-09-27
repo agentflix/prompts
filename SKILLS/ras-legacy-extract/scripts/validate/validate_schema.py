@@ -11,7 +11,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from _common import SCHEMAS_DIR, Contract, Report, base_args, finish, main_wrapper
+from _common import CONTRACT_VERSION, SCHEMAS_DIR, Contract, Report, base_args, finish, main_wrapper
 
 TYPES = {
     "object": dict, "array": list, "string": str, "boolean": bool,
@@ -83,6 +83,22 @@ def validate_file(data: Any, schema_name: str, label: str, report: Report) -> No
         report.fail(e)
 
 
+def _process_checks(c: Contract, report: Report) -> None:
+    """Contract version and human approval of the adapter (phase 0 gate)."""
+    docs = {"manifest": c.manifest, "inventory": c.inventory, "db-metadata": c.db,
+            "journeys": c.journeys, **{f"module[{n}]": m for n, m in c.modules.items()}}
+    for label, data in docs.items():
+        if isinstance(data, dict) and data.get("contract_version") != CONTRACT_VERSION:
+            report.fail(f"{label}: contract_version {data.get('contract_version')!r}, a skill usa "
+                        f"{CONTRACT_VERSION} — atualize o arquivo para o contrato atual")
+    phases = (c.manifest or {}).get("phases", {})
+    advanced = [p for p in ("1", "2", "3", "4", "5", "6", "7", "8")
+                if phases.get(p, {}).get("status") in ("in_progress", "done", "verified")]
+    if advanced and not ((c.manifest or {}).get("approvals") or {}).get("adapter"):
+        report.fail(f"fases {', '.join(advanced)} avançaram sem approvals.adapter no manifest "
+                    "(gate humano da Fase 0: o usuário precisa aprovar o ADAPTER.md)")
+
+
 def run(argv: list[str]) -> Report:
     args = base_args("Valida os JSON do contrato contra schemas/").parse_args(argv)
     report = Report("schema")
@@ -91,6 +107,7 @@ def run(argv: list[str]) -> Report:
         report.fail("manifest.json ausente")
         return report
     validate_file(c.manifest, "manifest.schema.json", "manifest", report)
+    _process_checks(c, report)
     if c.inventory is not None:
         validate_file(c.inventory, "inventory.schema.json", "inventory", report)
     else:

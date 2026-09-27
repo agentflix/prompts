@@ -26,7 +26,7 @@ reverse/
 
 ```json
 {
-  "contract_version": "1.0.0",
+  "contract_version": "1.1.0",
   "system": "nome-do-sistema",
   "language": "pt-BR",
   "output_root": "docs/reverse",
@@ -34,6 +34,7 @@ reverse/
   "created_at": "2026-09-27",
   "updated_at": "2026-09-27",
   "environments": {"browser": "homolog|local|prod-readonly|none", "db": "local-readonly"},
+  "approvals": {"adapter": {"by": "Nome de quem aprovou", "date": "2026-09-27"}},
   "repos": [
     {"name": "backend", "path": "../..", "commit": "55226983", "role": "api"},
     {"name": "frontend", "path": "/abs/path/front", "commit": "abc1234", "role": "ui"}
@@ -50,13 +51,15 @@ reverse/
 ```
 
 `repos[].path` relativo é resolvido a partir da raiz de saída (`reverse/`).
+`approvals.adapter` só é preenchido depois que o usuário aprovar o `ADAPTER.md`; sem ele o
+validador bloqueia as fases 1 a 8.
 
 ## README.md
 
 ```markdown
 # Extração do legado — <sistema>
 
-Commit(s) fixado(s): backend `<sha>`, frontend `<sha>`. Contrato `1.0.0`.
+Commit(s) fixado(s): backend `<sha>`, frontend `<sha>`. Contrato `1.1.0`.
 
 ## Como ler
 - Comece por `03-journeys/` (o que o usuário faz) e desça para telas, APIs e regras.

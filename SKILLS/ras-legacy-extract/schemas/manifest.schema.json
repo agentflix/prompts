@@ -9,6 +9,16 @@
     "output_root": {"type": "string"},
     "has_frontend": {"type": "boolean"},
     "environments": {"type": "object"},
+    "approvals": {
+      "type": "object",
+      "properties": {
+        "adapter": {
+          "type": "object", "required": ["by", "date"],
+          "properties": {"by": {"type": "string", "minLength": 2}, "date": {"type": "string", "minLength": 8},
+                         "note": {"type": "string"}}
+        }
+      }
+    },
     "created_at": {"type": "string"},
     "updated_at": {"type": "string"},
     "repos": {

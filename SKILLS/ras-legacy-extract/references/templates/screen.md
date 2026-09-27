@@ -6,7 +6,7 @@
 - **Rota**: `/licencas/nova` · **Menu**: Licenças › Nova
 - **Fonte**: `frontend:src/pages/licencas/Nova.tsx:1-240`
 - **Perfis**: franqueado, matriz (matriz vê campo "Desconto")
-- **Objetivo**: <1 frase>
+- **Objetivo**: <1 frase — obrigatório (`purpose`)>
 - **Screenshot**: ![](SCR-LIC-002.png)
 
 ## Campos
@@ -20,10 +20,13 @@
 |---|---|---|---|
 
 ## Ações
-| Botão/link | Pré-condição | Chama | Resultado / mensagem | Vai para |
+| Botão/link | Pré-condição | Chama | Resultado / mensagem (obrigatório) | Vai para |
 |---|---|---|---|---|
 | Salvar | formulário válido | API-LIC-007 | "Licença criada" | SCR-LIC-001 |
 | Cancelar | — | — | — | SCR-LIC-001 |
+
+Toda ação precisa de **Resultado**: o que o usuário vê depois — mensagem literal, tela
+seguinte, download, modal que fecha, recarga da lista. "—" não é resultado.
 
 ## Observações
 - Validações só no front (sem equivalente na API): <lista> → FND-*
