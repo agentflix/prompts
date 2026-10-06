@@ -11,7 +11,7 @@ até conseguir, ou remova-a. Regra que ninguém verifica é opinião.
 *Reforçado por:* teste ou comando exato · revisão
 ```
 
-## Conjunto base (derivado do DotBank)
+## Conjunto base (derivado de um port real)
 
 **Contrato**
 1. O contrato HTTP em produção é intocável: status, shape JSON e mensagens são os do legado. Mudança é
@@ -45,6 +45,8 @@ até conseguir, ou remova-a. Regra que ninguém verifica é opinião.
 19. A cobertura vem de teste unitário puro com mock sobre as interfaces de Repository. *Reforçado por:* gate de cobertura (meta de 80% na camada de lógica).
 20. Teste com banco usa transação por teste num banco próprio; `RefreshDatabase` é proibido. *Reforçado por:* `grep -rn "RefreshDatabase" tests` deve voltar vazio.
 21. Análise estática em nível alto com baseline **vazio**; acrescentar ao baseline é proibido. *Reforçado por:* o comando de análise estática do gate.
+21b. O alvo de linguagem é a versão de PHP do `composer.json` e do runtime de deploy, mesmo que a máquina local rode mais nova: sintaxe acima do alvo é proibida. *Reforçado por:* o comando de análise estática · revisão.
+21c. O nível da análise estática é o mais alto que o código atual comporta, sobe com o tempo e nunca desce. *Reforçado por:* o comando de análise estática.
 22. Todo módulo tem teste de paridade contra o legado antes de ser dado como pronto. *Reforçado por:* suíte de paridade.
 
 **Convenções**

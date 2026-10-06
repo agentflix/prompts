@@ -1,11 +1,12 @@
 # Segurança e autenticação
 
-Fonte: regras e decisões do DotBank. Cada item cita o motivo, porque a regra sem o porquê vira cargo cult.
+Fonte: regras e decisões de um port real de API financeira. Cada item cita o motivo, porque a regra sem o
+porquê vira cargo cult.
 
 ## Autenticação de máquina (parceiros)
 
-Quando outros sistemas chamam a API, a credencial deles não é a sessão do navegador. Decisão aplicada no
-DotBank (`client_credentials`):
+Quando outros sistemas chamam a API, a credencial deles não é a sessão do navegador. Decisão aplicada num port
+real (`client_credentials`):
 
 1. O consumidor troca `client_id:client_secret` (header Basic) por um **token JWT de curta duração**
    (cinco minutos) com escopo de um tenant ou conta. Só o token acompanha a chamada de negócio.
@@ -13,18 +14,19 @@ DotBank (`client_credentials`):
    credencial, ou a emissão é negada.
 3. O segredo é guardado como **hash** e exibido **uma única vez**, na geração.
 4. A integração **nasce desabilitada**. Só passa a existir por ato explícito de um administrador, nunca
-   por default de cadastro. (No DotBank havia 92 contas com credencial ativa, e só 8 delas pertenciam
+   por default de cadastro. (Num port real havia 92 contas com credencial ativa, e só 8 delas pertenciam
    aos 3 consumidores reais; as outras 84 foram revogadas.)
 5. A falha **não distingue** credencial inexistente, inativa, revogada ou segredo errado: mesma resposta.
    Isso evita enumeração.
 6. O rate limit da rota de token é **incondicional**, chaveado pelo `client_id` mais o IP.
 
 Se o legado usa um token longo guardado em texto claro, trate isso como finding de segurança e planeje a
-migração para o esquema acima como decisão própria, sem trocar tudo de uma vez. O token longo antigo
-continua válido durante a transição.
+migração para o esquema acima como decisão própria, sem trocar tudo de uma vez. No port real, a versão
+antiga e a nova da API coexistiram, cada uma com seu middleware de auth, sobre **as mesmas rotas de negócio**
+(uma definição só, com a versão nova ganha por envelope de autenticação, nunca por bloco copiado).
 
-Para o SPA React do próprio portal, a sessão por cookie (Sanctum) continua sendo uma opção separada: são
-dois modos de auth para dois tipos de cliente, e cada um tem ADR.
+Para um frontend SPA do próprio produto, a sessão por cookie (Sanctum) é uma opção separada: são dois modos
+de auth para dois tipos de cliente, e cada um tem ADR.
 
 ## Throttle e autenticação
 
@@ -35,7 +37,10 @@ limiter cego.
 
 ## Isolamento de tenant
 
-Erro de isolamento não aparece em teste e aparece em produção, então vira teste obrigatório.
+Erro de isolamento não aparece em teste e aparece em produção, então vira teste obrigatório. Num port real,
+o `search_path` do tenant foi aplicado na conexão errada: consultas que juntavam tabela comum e de tenant
+quebravam em produção, e nenhum teste ficou vermelho porque todos mockavam o repositório. O teste que pegou
+o erro usa **dois tenants num Postgres real** e confere o isolamento entre eles e o acesso à tabela comum.
 
 - Escolha o modelo no ADR: schema por tenant com `search_path` posicionado por middleware, ou coluna de
   tenant com **global scope** em todo model tenant-aware.

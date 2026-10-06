@@ -2,8 +2,7 @@
 
 ## Shadow (F4): comparar legado e novo sobre a mesma entrada
 
-Teste unitário e teste de paridade pontual não pegam o que o DotBank perdeu (tarifa que nunca era
-cobrada). Para fechamentos, comissões, cobrança e saldo:
+Teste unitário e teste de paridade pontual não pegam o que um port real perdeu (a tarifa nunca era cobrada). Para fechamentos, comissões, cobrança e saldo:
 
 1. Rode o legado e o novo sobre a **mesma entrada**. O novo calcula e compara, mas **não escreve** em
    produção durante o shadow.

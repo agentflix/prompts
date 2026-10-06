@@ -41,7 +41,7 @@ melhoria, cada uma com sua evidência.
 Antes de portar, prove que o código está vivo: busque os chamadores em todo o código analisado. Um método
 sem nenhum chamador, que dependeria de propriedade nunca inicializada, é código morto e **não** deve ser
 portado (portar seria criar infraestrutura sem consumidor). Registre a exclusão com a evidência da busca.
-No DotBank, um "motor de cobrança" que a auditoria inicial dava como faltando era código morto no legado;
+Num port real, um "motor de cobrança" que a auditoria inicial dava como faltando era código morto no legado;
 só a busca de chamadores desfez o falso alarme.
 
 ## Falso concluído

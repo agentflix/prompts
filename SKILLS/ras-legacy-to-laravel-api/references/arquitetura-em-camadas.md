@@ -1,6 +1,7 @@
 # Arquitetura em camadas
 
-Padrão validado no port do DotBank (`PATTERN.md`). Use como base e adapte o nome dos domínios.
+Padrão validado em um port real de Lumen para Laravel 12. Use como base e adapte o nome dos domínios. O
+resultado desta fase é o `PATTERN.md` do projeto novo, o documento canônico que as regras citam por seção.
 
 ## Fluxo
 
@@ -40,7 +41,7 @@ vazio é cerimônia sem valor, então CRUD trivial vai direto `Action -> Reposit
 
 ## Contrato de erro
 
-Preserve o envelope de erro do legado. No DotBank:
+Preserve o envelope de erro do legado. Num port real o envelope era:
 
 ```json
 { "message": "...", "type": "danger", "code": 0, "status": 0, "exception": "NomeDaClasse" }
@@ -70,7 +71,25 @@ impede divergência.
   (coluna que ninguém lê); documente a simplificação no docblock.
 - Todo comando que constrói o banco do legado (instalar, atualizar, semear) é inventário também. Se o
   legado cria o banco por comandos próprios e seeders, o port precisa dos dois, ou o banco limpo nasce
-  sem as tabelas de apoio. Isso foi o crítico nº 1 do DotBank.
+  sem as tabelas de apoio. Isso foi o achado crítico nº 1 da auditoria de um port real.
+- Se o legado marca cada coluna com comentário, ou separa migrations por schema em subpastas, mantenha a
+  convenção e registre as subpastas no `AppServiceProvider` (`loadMigrationsFrom`), porque o Laravel só
+  descobre a raiz por padrão. Comentário de coluna só se aplica na criação: alterou, recrie o schema de teste.
+
+## Validação, mensagens e status
+
+- **Mensagens de validação:** o formato do envelope é o do legado, mas o conteúdo de `errors` pode ser
+  amigável e específico. Cada FormRequest declara `messages()` e `attributes()`, e o arquivo de tradução
+  global fica só como fallback.
+- **Mensagem de sucesso:** guarde como constante na própria Action, copiada **byte a byte** do serviço
+  legado, para o contrato não mudar por um espaço ou uma vírgula.
+- **Status HTTP:** o legado pode devolver o mesmo status para erros de domínio diferentes, e o frontend pode
+  tratar esse status de um jeito (por exemplo, deslogar em 401). Mantenha uma tabela exceção para status,
+  com teste, e só mude um status com decisão registrada.
+- **Dinheiro:** preserve a serialização que o parceiro recebe hoje (string com duas casas, por exemplo), e
+  teste o payload.
+- **Dependência ainda não portada:** crie uma interface com binding seguro por padrão (veja
+  `integracoes.md`).
 
 ## Testes
 
