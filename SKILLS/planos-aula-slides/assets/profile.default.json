@@ -1,0 +1,13 @@
+{
+  "name": "Nome Sobrenome",
+  "role": "Professora de História e Geografia",
+  "facts": [
+    "Formação principal (curso, instituição, anos)",
+    "Bolsas, projetos ou grupos de pesquisa",
+    "Experiência docente (disciplinas, desde quando)",
+    "Outro destaque do currículo"
+  ],
+  "lattes": "http://lattes.cnpq.br/0000000000000000",
+  "short": "Prof.ª Nome Sobrenome",
+  "_nota": "EXEMPLO. Copie para um arquivo seu e aponte com PROFILE_JSON=/caminho/perfil.json, ou edite este. Dados vêm do Lattes (PDF) ou da própria professora; não afirme formação que o currículo não traz."
+}
