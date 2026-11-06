@@ -14,7 +14,7 @@ Leia e execute BOOTSTRAP-V9/bootstrap-v9.md
 
 O setup é um wizard em caixas de opções, com a recomendação já marcada, em três chamadas:
 1. ferramentas, modo, postura e saída;
-2. áreas de risco, skills de intenção e skills de trabalho longo;
+2. áreas de risco e skills de trabalho longo;
 3. o que ativar: proteções, statusline e notificação, regras por área e subagentes.
 
 O que você desmarca não é instalado.
@@ -106,7 +106,7 @@ CLAUDE.md                      @AGENTS.md + instruções de compactação
   hooks/                       gates.conf · _lib.sh · gate.sh (Stop) · guard.sh (PreToolUse) · format.sh (PostToolUse)
                                statusline.sh + statusline.py · notify.sh (Notification)
   rules/                       codigo · testes · api · dados · ui — cada uma com paths:, carrega só ao tocar a área
-  skills/                      spec · ship · postura · delegar · retomar · retro · code-review-confiavel · corrigir · investigar · construir · refatorar · migrar · verificar
+  skills/                      spec · ship · postura · delegar · retomar · retro · code-review-confiavel
   output-styles/curto.md       só com saída curta
   agents/                      explorador e mecanico (Haiku) · executor (Sonnet) · revisor (Opus, Edit e Write bloqueados)
 .agents/skills → ../.claude/skills     Codex
@@ -152,7 +152,6 @@ CLAUDE.md                      @AGENTS.md + instruções de compactação
 
 ### Entrou
 - Os três modos.
-- Skills de intenção no estilo TechLead: curtas, sem CAPS, com condição de parada.
 - Testes primeiro e travados no modo spec. Isso combate o reward hacking: quando o teste contradiz a spec, modelos editam o teste em cerca de 50% dos casos (ImpossibleBench, 2025).
 - Política de testes (`.claude/rules/testes.md`): o que testar (por risco e por critério de aceite), o que não testar e onde é permitido mock. Agentes adicionam mock em 36% dos commits contra 26% dos humanos (Hora & Robbes, MSR 2026), e cobertura não mede valor (Meta ACH, 2025).
 - Gate rápido com `{changed}`, que roda só os testes afetados pela mudança (vitest `related`, jest `--findRelatedTests`, pytest `--testmon`, pest `--dirty`).

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Verificar"
-  short_description: "Provar o critério de aceite e parar"
-  default_prompt: "Use $verificar para provar que isto está pronto."

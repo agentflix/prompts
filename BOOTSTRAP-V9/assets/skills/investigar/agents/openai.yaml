@@ -1,4 +1,0 @@
-interface:
-  display_name: "Investigar"
-  short_description: "Diagnóstico com evidência antes de editar"
-  default_prompt: "Use $investigar para achar a causa antes de mudar código."

@@ -20,8 +20,7 @@ Leia antes de perguntar. Descubra no código, com arquivo de origem:
 - Áreas de risco: migrations, contrato público, autenticação, pagamento, dado de cliente.
 - O que já existe de IA:
   - `AGENTS.md`, `CLAUDE.md`, `.claude/`, `.codex/`, `opencode.json`, `.context/`;
-  - se existir `.context/PREVEC.md` ou `.claude/agents/PLANNER.md`, o projeto está no V8; qualquer `.context/` ou doc de IA existente passa pela seção 2;
-  - skills globais em `~/.claude/skills/` com o mesmo papel das skills de intenção (`surgical-patch`, `investigate-first`, `lean-build`, `safe-refactor`, `migration`, `verify-and-stop`).
+  - se existir `.context/PREVEC.md` ou `.claude/agents/PLANNER.md`, o projeto está no V8; qualquer `.context/` ou doc de IA existente passa pela seção 2.
 
 Depois, pergunte com a ferramenta de pergunta da CLI (no Claude Code, `AskUserQuestion`): opções clicáveis, a recomendada primeiro e marcada como recomendada. Ela aceita até 4 perguntas por chamada e de 2 a 4 opções por pergunta, então o wizard tem três chamadas. Texto solto só se a ferramenta não existir.
 
@@ -39,10 +38,7 @@ Primeira chamada:
 
 Segunda chamada:
 1. **Áreas de risco** (múltipla escolha), com estas 4 opções e as detectadas já recomendadas: "Migrations e banco", "Contrato público da API", "Autenticação e permissão", "Pagamento e dado de cliente". O usuário acrescenta outra pelo campo livre.
-2. **Skills de intenção** (`corrigir`, `investigar`, `construir`, `refatorar`, `migrar`, `verificar`):
-   - recomende `não instalar` quando houver equivalentes globais;
-   - senão, recomende `instalar`.
-3. **Skills de trabalho longo** (`/retomar` e `/retro`): `instalar` (recomendado) ou `não instalar`.
+2. **Skills de trabalho longo** (`/retomar` e `/retro`): `instalar` (recomendado) ou `não instalar`.
 
 Terceira chamada: o que ativar. As quatro perguntas são de múltipla escolha e vêm com as opções recomendadas marcadas como recomendadas.
 1. **Proteções:** "Gate no fim do turno", "Guard de arquivos protegidos", "Formatter automático". Recomende as três, e o formatter só se o projeto tem um.
@@ -117,7 +113,6 @@ Antes de apagar qualquer arquivo, mostre a lista completa e espere o usuário co
 | `rules/api.md` · `dados.md` · `ui.md` | `.claude/rules/` | Conforme o wizard. Remova o comentário de molde. `paths:` com as pastas reais. Cada `<...>` vira `arquivo:linha` ou "ainda não existe" |
 | `skills/spec` · `skills/ship` · `skills/postura` | `.claude/skills/` | Copie |
 | `skills/retomar` · `skills/retro` · `skills/code-review-confiavel` | `.claude/skills/` | Conforme o wizard |
-| `skills/{corrigir,investigar,construir,refatorar,migrar,verificar}` | `.claude/skills/` | Conforme a resposta sobre skills de intenção |
 | `agents/{explorador,mecanico,executor,revisor}.md` | `.claude/agents/` | Conforme o wizard, com qualquer ferramenta: é a especificação que os agentes do Codex e do OpenCode leem. Sem revisor, o `ship` usa `/code-review`. Ajuste a seção Orquestração do `AGENTS.md` e a tabela da skill `delegar` aos agentes instalados |
 | `skills/delegar` | `.claude/skills/delegar` | Sempre que houver ao menos um subagente instalado |
 | `context/decision.template.md` | `.context/decisions/_TEMPLATE.md` | Copie. Crie também `.context/specs/` vazio, com `.gitkeep` |
