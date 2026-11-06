@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ship"
+  short_description: "Gate completo, revisão por risco, contexto em dia, commit"
+  default_prompt: "Use $ship para validar e fechar esta mudança."

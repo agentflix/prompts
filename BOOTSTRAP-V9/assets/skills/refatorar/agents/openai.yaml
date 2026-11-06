@@ -1,0 +1,4 @@
+interface:
+  display_name: "Refatorar"
+  short_description: "Reestruturar preservando comportamento"
+  default_prompt: "Use $refatorar para reorganizar este código sem mudar comportamento."

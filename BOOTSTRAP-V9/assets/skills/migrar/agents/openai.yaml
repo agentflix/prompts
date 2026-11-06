@@ -1,0 +1,4 @@
+interface:
+  display_name: "Migrar"
+  short_description: "Transição reversível com rollback e prova"
+  default_prompt: "Use $migrar para fazer esta migração com caminho de volta."

@@ -1,0 +1,8 @@
+name = "executor"
+description = "Implementa uma tarefa já especificada no pedido, com escopo, critério de pronto e prova. Não decide arquitetura."
+# Modelo: o bootstrap preenche com o modelo de uso geral recomendado na doc atual do Codex.
+# Sem a linha model, o agente herda o modelo da sessão.
+model_reasoning_effort = "high"
+developer_instructions = """
+Leia e siga integralmente .claude/agents/executor.md, que é a especificação do papel.
+"""

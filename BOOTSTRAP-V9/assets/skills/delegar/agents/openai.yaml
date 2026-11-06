@@ -1,0 +1,4 @@
+interface:
+  display_name: "Delegar"
+  short_description: "Quando delegar, qual agente e modelo, pedido e escalada"
+  default_prompt: "Use $delegar antes de abrir um subagente."

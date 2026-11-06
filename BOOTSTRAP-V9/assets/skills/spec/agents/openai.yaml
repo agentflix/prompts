@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec"
+  short_description: "Entrevista, SPEC.md, testes primeiro, implementação"
+  default_prompt: "Use $spec para conduzir esta mudança com spec e testes antes do código."

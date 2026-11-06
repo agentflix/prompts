@@ -1,0 +1,14 @@
+# Codex: configuração do projeto (PREVEC V9).
+# Modelo: o padrão da sua conta. Não fixe nome de modelo aqui; ele muda a cada release
+# e o nome velho quebra a config. Ajuste o esforço por tarefa com /model ou -c.
+model_reasoning_effort = "medium"
+# A postura vem do AGENTS.md; a personalidade embutida do Codex sai para não competir com ela.
+personality = "none"
+# Saída curta escolhida no setup: "low". Saída normal: apague a linha.
+model_verbosity = "low"
+
+[features]
+hooks = true
+
+[agents]
+default_subagent_reasoning_effort = "medium"

@@ -1,0 +1,8 @@
+name = "mecanico"
+description = "Transformação mecânica e repetitiva com prova automática no pedido: rename, troca de import, ajuste repetido."
+# Modelo: o bootstrap preenche com o modelo rápido recomendado na doc atual do Codex.
+# Sem a linha model, o agente herda o modelo da sessão.
+model_reasoning_effort = "medium"
+developer_instructions = """
+Leia e siga integralmente .claude/agents/mecanico.md, que é a especificação do papel.
+"""

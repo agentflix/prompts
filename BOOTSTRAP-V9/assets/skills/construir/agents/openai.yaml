@@ -1,0 +1,4 @@
+interface:
+  display_name: "Construir"
+  short_description: "Menor fatia completa da feature, sem excesso"
+  default_prompt: "Use $construir para implementar esta feature sem escopo especulativo."

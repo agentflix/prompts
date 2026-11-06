@@ -1,0 +1,4 @@
+interface:
+  display_name: "Corrigir"
+  short_description: "Correção na camada certa com prova de regressão"
+  default_prompt: "Use $corrigir para resolver este bug sem mexer no resto."
