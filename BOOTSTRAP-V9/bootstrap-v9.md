@@ -22,7 +22,7 @@ Leia antes de perguntar. Descubra no código, com arquivo de origem:
   - `AGENTS.md`, `CLAUDE.md`, `.claude/`, `.codex/`, `opencode.json`, `.context/`;
   - se existir `.context/PREVEC.md` ou `.claude/agents/PLANNER.md`, o projeto está no V8; qualquer `.context/` ou doc de IA existente passa pela seção 2.
 
-Depois, pergunte com a ferramenta de pergunta da CLI (no Claude Code, `AskUserQuestion`): opções clicáveis, a recomendada primeiro e marcada como recomendada. Ela aceita até 4 perguntas por chamada e de 2 a 4 opções por pergunta, então o wizard tem três chamadas. Texto solto só se a ferramenta não existir.
+Depois, pergunte com a ferramenta de pergunta da CLI (no Claude Code, `AskUserQuestion`): opções clicáveis, a recomendada primeiro e marcada como recomendada. Ela aceita até 4 perguntas por chamada e de 2 a 4 opções por pergunta, então o wizard tem até quatro chamadas. Texto solto só se a ferramenta não existir.
 
 Primeira chamada:
 1. **Ferramentas** (múltipla escolha): Claude Code, Codex, OpenCode. Recomende as que já têm pasta no projeto, mais o Claude Code.
@@ -51,6 +51,22 @@ Terceira chamada: o que ativar. As quatro perguntas são de múltipla escolha e 
    - "Code review com 8 revisores" (recomendado com postura conservadora ou modo spec).
 
 O que o usuário desmarcar não é copiado nem ligado no `settings.json`.
+
+Quarta chamada: conflitos com o que já existe. Faça só as perguntas que se aplicam, cada uma com o caso concreto que você achou:
+1. **Statusline:** o usuário já tem `statusLine` própria (em `~/.claude/settings.json` ou `$CLAUDE_CONFIG_DIR/settings.json`). Opções:
+   - "Usar a do V9" (recomendado, porque traz branch, modelo, contexto e linhas, mais tarefa, gate e cache);
+   - "Manter a minha".
+2. **Saída curta:** o usuário já usa um plugin de saída curta (ex.: caveman). Opções:
+   - "Manter o meu" (recomendado);
+   - "Usar o `curto` do V9".
+3. **Instruções que já existem** (`CLAUDE.md` na raiz ou em subpastas, `.cursor/rules`). Opções:
+   - "Manter onde estão" (recomendado se forem específicas de uma subpasta);
+   - "Migrar para o formato V9" (seção 2).
+
+   Nunca apague nem mova sem essa resposta.
+4. **Git:** o `.gitignore` ignora `.claude/` ou `.agents/`. Opções:
+   - "Versionar o V9" (recomendado);
+   - "Manter ignorado".
 
 Dado que o código não responde e o usuário não sabe: deixe fora e registre como pendência no relatório. Não invente valor.
 
@@ -99,11 +115,7 @@ Antes de apagar qualquer arquivo, mostre a lista completa e espere o usuário co
 
 | Origem em `$B/assets` | Destino | Como |
 |---|---|---|
-| `project/AGENTS.md` | `AGENTS.md` | Preencha. Remova o comentário de molde. Ajuste o que cita item não instalado:
-- sem gate, a frase "No Claude Code e no Codex um hook já faz isso" sai;
-- sem `revisor`, o modo padrão pede `/code-review`;
-- sem `testes.md`, sai a linha que manda lê-lo;
-- regra de área ausente sai da lista. Cole na seção Postura o bloco de `skills/postura/references/<postura>.md`. De 35 a 55 linhas. Linha sem conteúdo real sai. Se já existe um `AGENTS.md`, aproveite dele só o que passa no filtro das duas perguntas do topo, e mostre ao usuário o que saiu |
+| `project/AGENTS.md` | `AGENTS.md` | Preencha. Remova o comentário de molde. Ajuste o que cita item não instalado (lista abaixo da tabela). Cole na seção Postura o bloco de `skills/postura/references/<postura>.md`. De 40 a 60 linhas. Linha sem conteúdo real sai. Se já existe um `AGENTS.md`, aproveite dele só o que passa no filtro das duas perguntas do topo, e mostre ao usuário o que saiu |
 | `project/CLAUDE.md` | `CLAUDE.md` | Se não existe, copie. Se existe sem `@AGENTS.md`: mova o conteúdo útil para o `AGENTS.md` (com o mesmo filtro), deixe no `CLAUDE.md` só o que é específico do Claude e ponha `@AGENTS.md` na primeira linha |
 | `project/settings.json` | `.claude/settings.json` | Só com Claude Code. Remova do molde os hooks e a `statusLine` que o usuário desmarcou no wizard. Se já existe, mescle chave a chave. Em `permissions.deny` e `ask`, una as listas sem repetir. Em `hooks`, acrescente cada evento só se nenhum hook dele já chama o mesmo script; hook duplicado roda duas vezes. Acrescente ao `deny` o cliente de banco do projeto (`Bash(psql *)`, `Bash(supabase db execute *)`…) quando houver banco. Postura `conservador`: acrescente ao `ask` o comando de instalar dependência do projeto. Saída `curta`: `"outputStyle": "curto"`. A `statusLine` do projeto substitui a do usuário. A do V9 já traz na primeira linha branch, modelo, janela de contexto e linhas da sessão, e na segunda tarefa, gate e cache. Se o usuário tem `statusLine` própria (procure em `~/.claude/settings.json` ou em `$CLAUDE_CONFIG_DIR/settings.json`), mostre as duas e pergunte qual fica |
 | `output-styles/curto.md` | `.claude/output-styles/curto.md` | Só com saída `curta`. Se o usuário já usa um plugin de saída curta (ex.: caveman), pergunte se fica o dele ou este |
@@ -116,8 +128,33 @@ Antes de apagar qualquer arquivo, mostre a lista completa e espere o usuário co
 | `agents/{explorador,mecanico,executor,revisor}.md` | `.claude/agents/` | Conforme o wizard, com qualquer ferramenta: é a especificação que os agentes do Codex e do OpenCode leem. Sem revisor, o `ship` usa `/code-review`. Ajuste a seção Orquestração do `AGENTS.md` e a tabela da skill `delegar` aos agentes instalados |
 | `skills/delegar` | `.claude/skills/delegar` | Sempre que houver ao menos um subagente instalado |
 | `context/decision.template.md` | `.context/decisions/_TEMPLATE.md` | Copie. Crie também `.context/specs/` vazio, com `.gitkeep` |
-| `codex/config.toml` · `codex/hooks.json` · `agents/codex/*.toml` | `.codex/config.toml` · `.codex/hooks.json` · `.codex/agents/` | Só com Codex, e só os agentes escolhidos. Preencha o `model` de cada agente com o modelo rápido e o de uso geral que a doc atual do Codex recomenda para subagentes; sem certeza, deixe sem a linha, e o agente herda o modelo da sessão. Rode `mkdir -p .agents && ln -sfn ../.claude/skills .agents/skills`. Saída `normal`: apague `model_verbosity` |
+| `codex/config.toml` · `codex/hooks.json` · `agents/codex/*.toml` | `.codex/config.toml` · `.codex/hooks.json` · `.codex/agents/` | Só com Codex, e só os agentes escolhidos. Preencha o `model` de cada agente com o modelo rápido e o de uso geral que a doc atual do Codex recomenda para subagentes; sem certeza, deixe sem a linha, e o agente herda o modelo da sessão. Skills: veja "Skills que o projeto já tem" abaixo da tabela. Saída `normal`: apague `model_verbosity` |
 | `agents/opencode/*.md` | `.opencode/agents/` | Só com OpenCode, e só os agentes escolhidos. Confira na doc atual se os IDs `anthropic/claude-*-5-5#effort` ainda valem. O OpenCode V2 já lê `AGENTS.md` e `.claude/skills` sozinho. Não crie `opencode.json` sem necessidade |
+
+Ajustes no `AGENTS.md` conforme o que não foi instalado:
+- sem gate, a frase "No Claude Code e no Codex um hook já faz isso" sai;
+- sem `revisor`, o modo padrão pede `/code-review`;
+- sem `testes.md`, sai a linha que manda lê-lo;
+- regra de área ausente sai da lista.
+
+Skills que o projeto já tem:
+- **Pasta real em `.agents/skills`** (gerenciada por `npx skills`, com `skills-lock.json`) **e symlinks em `.claude/skills`:** não troque essa estrutura. Copie as skills do V9 como pastas reais em `.claude/skills/<nome>`. Com Codex, crie um symlink por skill em `.agents/skills/<nome>` apontando para `../../.claude/skills/<nome>`, em vez de substituir a pasta.
+- **`.agents/skills` não existe e há Codex:** `mkdir -p .agents && ln -sfn ../.claude/skills .agents/skills`.
+
+`.gitignore` que ignora `.claude/` ou `.agents/` inteiros: o V9 só funciona para quem clonar se for versionado. Pergunte (veja a quarta chamada do wizard) e, se a resposta for versionar, acrescente as exceções sem tirar o que já está ignorado:
+
+```
+!.claude/
+.claude/*
+!.claude/settings.json
+!.claude/hooks/
+!.claude/rules/
+!.claude/agents/
+!.claude/output-styles/
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/<cada skill do V9>/
+```
 
 Crie as pastas antes de copiar: `mkdir -p .claude/hooks .claude/rules .claude/skills .claude/agents .claude/output-styles .context/decisions .context/specs`, mais `.codex/agents` e `.opencode/agents` conforme as ferramentas.
 
@@ -153,7 +190,7 @@ Regra que dá para garantir por máquina não fica só no texto. Se o projeto te
    - rode `echo '{}' | .claude/hooks/gate.sh; echo "exit $?"`;
    - confirme que o gate rodou de verdade: `test -f "$(git rev-parse --git-path prevec/gate-ok)"` só passa se o `GATE_FAST` executou e ficou verde;
    - desfaça a mudança.
-   Se o gate do projeto já está vermelho antes de qualquer mudança, ponha `GATE_ON_STOP=0` no `gates.conf` e registre como pendência. Assim o hook não prende o agente consertando código que não é dele. Religue quando o gate ficar verde.
+   Se só uma parte do gate está vermelha antes de qualquer mudança (um alvo de teste entre vários), monte o `GATE_FAST` só com as partes verdes e registre a vermelha como pendência, com o comando e o número de falhas. Se tudo está vermelho, ponha `GATE_ON_STOP=0` no `gates.conf` e registre como pendência. Assim o hook não prende o agente consertando código que não é dele. Religue quando o gate ficar verde.
 3. Teste o guard: `echo '{"tool_input":{"file_path":".env"}}' | .claude/hooks/guard.sh; echo "exit $?"` deve sair com 2.
 
 Relate em até 15 linhas:

@@ -51,5 +51,6 @@ Mudança em <migrations, contrato público da API, autenticação, pagamento> pe
 
 - Termine com o que mudou, a evidência (o comando e a saída relevante) e o risco que sobrou. Seja conciso.
 - Commits seguem Conventional Commits em <pt-BR>. Push e PR só com pedido explícito.
+- Erro de causa desconhecida: junte evidência e teste a hipótese mais barata antes de editar; corrija só quando uma causa explicar tudo.
 - Antes de escrever teste, leia `.claude/rules/testes.md`: teste só com motivo (critério, risco ou bug), na fronteira, com mock só no que é externo.
 - Se um teste existente parecer errado, pare e diga por quê. Não edite o teste para passar.
