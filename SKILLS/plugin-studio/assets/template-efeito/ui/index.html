@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__PLUGIN_DISPLAY__</title>
+<style>
+  :root {
+    --accent: #36d6c3;            /* cor de destaque: troque aqui */
+    --accent-dim: rgba(54, 214, 195, .35);   /* mesma cor, transparente (brilho do arco) */
+    --bg: #0f1114;
+    --panel: #171a1f;
+    --panel-2: #1e2229;
+    --line: #2a2f37;
+    --text: #e7eaee;
+    --muted: #8a929d;
+    --danger: #ff5a5f;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, system-ui, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; }
+  body { font-family: var(--font); color: var(--text); user-select: none; -webkit-user-select: none; }
+
+  /* tamanho de projeto 640x400: o mesmo de uiDesignWidth/uiDesignHeight no PluginEditor.h */
+  #panel {
+    position: absolute; left: 0; top: 0; width: 640px; height: 400px; transform-origin: 0 0;
+    display: grid; grid-template-rows: 56px 1fr 52px;
+    background: radial-gradient(120% 90% at 50% 0%, #20252d 0%, var(--panel) 55%, #121418 100%);
+    border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+  }
+
+  header { display: flex; align-items: center; justify-content: space-between; padding: 0 22px; border-bottom: 1px solid var(--line); }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand i { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+  .brand b { font-size: 18px; letter-spacing: .18em; font-weight: 700; }
+
+  .toggle {
+    font: 600 11px var(--font); letter-spacing: .14em; color: var(--muted); cursor: pointer;
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toggle .led { width: 8px; height: 8px; border-radius: 50%; background: #3a3f47; }
+  .toggle[aria-pressed="true"] { color: var(--text); border-color: var(--danger); }
+  .toggle[aria-pressed="true"] .led { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+
+  main { display: grid; grid-template-columns: 1fr 1fr 1fr 84px; align-items: center; padding: 8px 18px 4px 18px; }
+  main.bypassed .knob { opacity: .45; }
+
+  .knob { display: flex; flex-direction: column; align-items: center; gap: 6px; transition: opacity .15s; }
+  .knob .lbl { font-size: 11px; letter-spacing: .2em; color: var(--muted); font-weight: 600; }
+  .knob svg { width: 132px; height: 132px; cursor: ns-resize; touch-action: none; }
+  .knob .val { font: 600 13px var(--mono); color: var(--text); min-height: 18px; }
+  .knob .track { stroke: #2b3038; }
+  .knob .arc { stroke: var(--accent); filter: drop-shadow(0 0 4px var(--accent-dim)); }
+  .knob .cap { fill: url(#capGrad); stroke: #0b0d10; stroke-width: 1.5; }
+  .knob .ptr { stroke: var(--text); }
+
+  .meter { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 6px 0; }
+  .meter .lbl { font-size: 10px; letter-spacing: .2em; color: var(--muted); font-weight: 600; }
+  .meter .well { position: relative; width: 16px; height: 190px; background: #0c0e11; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+  .meter .fill { position: absolute; left: 0; right: 0; bottom: 0; height: 0;
+                 background: linear-gradient(to top, var(--accent) 0%, var(--accent) 70%, #f3d34a 88%, var(--danger) 100%);
+                 background-size: 100% 188px; background-position: bottom; }  /* gradiente fixo na escala, não na altura da barra */
+  .meter .zero { position: absolute; left: 0; right: 0; height: 1px; background: #ffffff55; }
+  .meter .num { font: 600 11px var(--mono); color: var(--muted); min-width: 52px; text-align: center; }
+  .meter .num.clip { color: var(--danger); }
+
+  footer { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 18px; border-top: 1px solid var(--line); background: #13161a; }
+  .presets { display: flex; align-items: center; gap: 8px; }
+  .presets button {
+    width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-2);
+    color: var(--muted); font-size: 12px; cursor: pointer;
+  }
+  .presets button:hover { color: var(--text); border-color: var(--accent); }
+  #presetName { min-width: 190px; text-align: center; font: 600 12px var(--font); letter-spacing: .16em; padding: 7px 10px;
+                border-radius: 8px; background: #0e1013; border: 1px solid var(--line); }
+  .tag { font-size: 10px; letter-spacing: .2em; color: var(--muted); }
+  .sig { justify-self: end; font-size: 11px; letter-spacing: .14em; color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="panel">
+  <header>
+    <div class="brand"><i></i><b>__PLUGIN_DISPLAY__</b></div>
+    <button id="bypass" class="toggle" aria-pressed="false" title="Desliga o efeito (com crossfade)"><span class="led"></span>BYPASS</button>
+  </header>
+  <main id="main">
+    <div class="knob" id="kGain"></div>
+    <div class="knob" id="kTone"></div>
+    <div class="knob" id="kMix"></div>
+    <div class="meter">
+      <span class="lbl">OUT</span>
+      <div class="well"><div class="fill" id="meterFill"></div><div class="zero" id="meterZero"></div></div>
+      <span class="num" id="meterNum">-inf</span>
+    </div>
+  </main>
+  <footer>
+    <span class="tag">PRESET</span>
+    <div class="presets">
+      <button id="prev" title="Preset anterior" aria-label="Preset anterior">&#9664;</button>
+      <div id="presetName">-</div>
+      <button id="next" title="Próximo preset" aria-label="Próximo preset">&#9654;</button>
+    </div>
+    <span class="sig">__COMPANY__</span>
+  </footer>
+</div>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <radialGradient id="capGrad" cx="40%" cy="35%" r="75%">
+      <stop offset="0%" stop-color="#3a414c"/><stop offset="60%" stop-color="#22272f"/><stop offset="100%" stop-color="#16191e"/>
+    </radialGradient>
+  </defs>
+</svg>
+
+<script type="module">
+/* =====================================================================
+   TABELA DE PARÂMETROS (igual a Source/Parameters.h; o teste do processador confere)
+   Na ponte os sliders trafegam NORMALIZADOS n (0..1); "real" é o que o DSP usa.
+   id      tipo    faixa real        real a partir de n          padrão
+   gain    slider  -24..+24 dB       dB = -24 + 48 n             0 dB
+   tone    slider  -12..+12 dB       dB = -12 + 24 n             0 dB   (tilt: >0 clareia, <0 escurece)
+   mix     slider  0..100 %          % = 100 n                   100 %
+   bypass  toggle  off/on            -                           off
+   DSP -> UI: evento "meter" {p: pico de saída em dB x10}, até 30 Hz, só quando muda.
+   Fora do plugin (arquivo aberto no navegador) o medidor é simulado.
+   ===================================================================== */
+
+window.__errors = [];
+addEventListener("error", e => window.__errors.push("ERR " + e.message + " @" + e.lineno));
+addEventListener("unhandledrejection", e => window.__errors.push("REJ " + e.reason));
+
+/* ---------- ponte com o plugin ---------- */
+let Juce = null, bridgeError = "window.__JUCE__ indefinido";
+if (window.__JUCE__) {
+  try { Juce = await import("./js/juce/index.js"); bridgeError = ""; }
+  catch (e) { bridgeError = "import falhou: " + String(e && e.message || e); }
+}
+const hasJuce = !!Juce;
+if (!hasJuce && location.protocol !== "file:") {
+  const d = document.createElement("div");
+  d.style.cssText = "position:fixed;left:0;right:0;bottom:0;z-index:99;background:#b00020;color:#fff;font:12px monospace;padding:6px 10px";
+  d.textContent = "SEM PONTE COM O PLUGIN: " + bridgeError;
+  document.body.appendChild(d);
+}
+
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+const $ = s => document.querySelector(s);
+
+/* lg=[min,max] marca um slider logarítmico: o JS do JUCE só conhece faixa linear e guarda o valor real,
+   então aqui convertemos real <-> n logarítmico (get: getScaledValue -> n; set: n -> normalizado linear). */
+const vOfLg = (n, r) => r[0] * Math.pow(r[1] / r[0], n);
+const nOfLg = (v, r) => clamp(Math.log(Math.max(v, r[0]) / r[0]) / Math.log(r[1] / r[0]), 0, 1);
+
+/* parâmetro com a mesma interface dentro e fora do plugin: {get, set, onChange, begin, end} */
+function makeParam(id, kind, init, lg) {
+  const subs = [], fire = () => subs.forEach(f => f());
+  if (hasJuce) {
+    const st = kind === "slider" ? Juce.getSliderState(id) : kind === "toggle" ? Juce.getToggleState(id) : Juce.getComboBoxState(id);
+    st.valueChangedEvent.addListener(fire);
+    if (st.propertiesChangedEvent) st.propertiesChangedEvent.addListener(fire);
+    const lin = () => { const p = st.properties; return p.end > p.start ? [p.start, p.end] : [0, 1]; };
+    return {
+      get: () => kind === "slider" ? (lg ? nOfLg(st.getScaledValue(), lg) : st.getNormalisedValue())
+               : kind === "toggle" ? !!st.getValue() : st.getChoiceIndex(),
+      set: v => {
+        if (kind === "slider") {
+          if (lg) { const [a, b] = lin(); st.setNormalisedValue(clamp((vOfLg(v, lg) - a) / (b - a), 0, 1)); }
+          else st.setNormalisedValue(clamp(v, 0, 1));
+        } else if (kind === "toggle") st.setValue(!!v);
+        else st.setChoiceIndex(v);
+        fire();
+      },
+      onChange: cb => subs.push(cb),
+      begin: () => st.sliderDragStarted && st.sliderDragStarted(),
+      end: () => st.sliderDragEnded && st.sliderDragEnded()
+    };
+  }
+  let v = init;
+  return { get: () => v, set: x => { v = kind === "slider" ? clamp(x, 0, 1) : x; fire(); }, onChange: cb => subs.push(cb), begin() {}, end() {} };
+}
+
+/* ---------- parâmetros (valores iniciais = preset 0) ---------- */
+const gain = makeParam("gain", "slider", 0.5);
+const tone = makeParam("tone", "slider", 0.5);
+const mix = makeParam("mix", "slider", 1);
+const bypass = makeParam("bypass", "toggle", false);
+
+const gainDb = () => -24 + 48 * gain.get();
+const toneDb = () => -12 + 24 * tone.get();
+const mixPct = () => 100 * mix.get();
+const fmtDb = d => (Math.abs(d) < 0.05 ? "0.0" : (d > 0 ? "+" : "") + d.toFixed(1)) + " dB";
+
+/* ---------- presets: valores REAIS, chaves = ids dos parâmetros. O preset 0 é o padrão do plugin. ---------- */
+const PRESETS = [
+  {n:"Neutro",gain:0,tone:0,mix:100},
+  {n:"Calor",gain:1,tone:-4,mix:100},
+  {n:"Brilho",gain:0,tone:4,mix:100},
+  {n:"Ar Sutil",gain:0,tone:2.5,mix:60},
+  {n:"Corpo",gain:2,tone:-6,mix:50},
+  {n:"Empurrão",gain:6,tone:0,mix:100},
+  {n:"Recuo",gain:-6,tone:0,mix:100},
+  {n:"Escuro",gain:1.5,tone:-9,mix:100}
+];
+let current = 0, ready = false;
+
+function applyPreset(i) {
+  current = (i % PRESETS.length + PRESETS.length) % PRESETS.length;
+  const v = PRESETS[current];
+  gain.set((v.gain + 24) / 48);
+  tone.set((v.tone + 12) / 24);
+  mix.set(v.mix / 100);
+  refreshPreset();
+}
+function matches(i) {
+  const v = PRESETS[i];
+  return Math.abs(gainDb() - v.gain) <= 0.05 && Math.abs(toneDb() - v.tone) <= 0.05 && Math.abs(mixPct() - v.mix) <= 0.5;
+}
+function refreshPreset() {
+  $("#presetName").textContent = (PRESETS[current].n + (ready && !matches(current) ? " *" : "")).toUpperCase();
+}
+/* no plugin: o estado vem do host. Acha o preset pelos valores, sem reaplicar nada. */
+function detectPreset() {
+  if (!matches(current)) { const i = PRESETS.findIndex((_, k) => matches(k)); if (i >= 0) current = i; }
+  refreshPreset();
+}
+$("#prev").onclick = () => applyPreset(current - 1);
+$("#next").onclick = () => applyPreset(current + 1);
+
+/* ---------- knob: arrasto vertical, Shift = fino, duplo clique = padrão, roda do mouse ---------- */
+const A0 = -135, A1 = 135;
+const polar = (a, r) => { const t = (a - 90) * Math.PI / 180; return [60 + r * Math.cos(t), 60 + r * Math.sin(t)]; };
+function arcPath(a, b, r) {
+  if (Math.abs(b - a) < 0.01) return "";
+  const [x0, y0] = polar(Math.min(a, b), r), [x1, y1] = polar(Math.max(a, b), r);
+  return `M${x0.toFixed(2)} ${y0.toFixed(2)} A${r} ${r} 0 ${Math.abs(b - a) > 180 ? 1 : 0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`;
+}
+function makeKnob(host, p, { label, def, text, bipolar = false }) {
+  host.innerHTML = `<span class="lbl">${label}</span>
+    <svg viewBox="0 0 120 120" role="slider" aria-label="${label}" tabindex="0">
+      <path class="track" d="${arcPath(A0, A1, 50)}" fill="none" stroke-width="6" stroke-linecap="round"/>
+      <path class="arc" fill="none" stroke-width="6" stroke-linecap="round"/>
+      <circle class="cap" cx="60" cy="60" r="36"/>
+      <line class="ptr" x1="60" y1="60" x2="60" y2="32" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+    <span class="val"></span>`;
+  const svg = host.querySelector("svg"), arc = host.querySelector(".arc"), ptr = host.querySelector(".ptr"), val = host.querySelector(".val");
+  const draw = () => {
+    const n = p.get(), a = A0 + (A1 - A0) * n;
+    arc.setAttribute("d", arcPath(bipolar ? 0 : A0, a, 50));
+    ptr.setAttribute("transform", `rotate(${a} 60 60)`);
+    val.textContent = text();
+    svg.setAttribute("aria-valuetext", text());
+  };
+  p.onChange(draw);
+
+  let dragging = false, lastY = 0;
+  svg.addEventListener("pointerdown", e => {
+    dragging = true; lastY = e.clientY; svg.setPointerCapture(e.pointerId); p.begin(); e.preventDefault();
+  });
+  svg.addEventListener("pointermove", e => {
+    if (!dragging) return;
+    const dy = lastY - e.clientY; lastY = e.clientY;
+    p.set(clamp(p.get() + dy * (e.shiftKey ? 0.0008 : 0.005), 0, 1));
+  });
+  const stop = () => { if (dragging) { dragging = false; p.end(); } };
+  svg.addEventListener("pointerup", stop);
+  svg.addEventListener("pointercancel", stop);
+  svg.addEventListener("dblclick", () => { p.begin(); p.set(def); p.end(); });
+  svg.addEventListener("wheel", e => {
+    e.preventDefault();
+    p.begin(); p.set(clamp(p.get() - Math.sign(e.deltaY) * (e.shiftKey ? 0.002 : 0.02), 0, 1)); p.end();
+  }, { passive: false });
+  draw();
+}
+makeKnob($("#kGain"), gain, { label: "GAIN", def: 0.5, bipolar: true, text: () => fmtDb(gainDb()) });
+makeKnob($("#kTone"), tone, { label: "TONE", def: 0.5, bipolar: true, text: () => fmtDb(toneDb()) });
+makeKnob($("#kMix"), mix, { label: "MIX", def: 1, text: () => Math.round(mixPct()) + " %" });
+[gain, tone, mix].forEach(p => p.onChange(refreshPreset));
+
+/* ---------- bypass ---------- */
+const bypBtn = $("#bypass");
+const drawBypass = () => { const on = !!bypass.get(); bypBtn.setAttribute("aria-pressed", String(on)); $("#main").classList.toggle("bypassed", on); };
+bypass.onChange(drawBypass);
+bypBtn.onclick = () => bypass.set(!bypass.get());
+drawBypass();
+
+/* ---------- medidor de pico de saída (-60..+6 dB) ---------- */
+const M_LO = -60, M_HI = 6;
+const meterPos = db => clamp((db - M_LO) / (M_HI - M_LO), 0, 1);
+$("#meterZero").style.bottom = (meterPos(0) * 100) + "%";
+let meterTarget = -100, meterShown = -100, lastT = performance.now();
+if (hasJuce) window.__JUCE__.backend.addEventListener("meter", e => { meterTarget = e && typeof e.p === "number" ? e.p / 10 : -100; });
+
+function simulatedPeak(t) {
+  // sinal fictício: -18 dBFS com oscilação, passando pelo GAIN/MIX como o DSP faria
+  const inDb = -18 + 5 * Math.sin(t / 700) + 3 * Math.sin(t / 173);
+  if (bypass.get()) return inDb;
+  const m = mix.get(), g = Math.pow(10, gainDb() / 20);
+  return 20 * Math.log10(Math.max(1e-5, (1 - m) + m * g)) + inDb + Math.abs(toneDb()) * 0.15;
+}
+function frame(t) {
+  const dt = Math.min(0.1, (t - lastT) / 1000); lastT = t;
+  const target = hasJuce ? meterTarget : simulatedPeak(t);
+  meterShown = target >= meterShown ? target : Math.max(target, meterShown - 24 * dt);   // queda de 24 dB/s
+  $("#meterFill").style.height = (meterPos(meterShown) * 100) + "%";
+  const num = $("#meterNum");
+  num.textContent = meterShown <= -89.9 ? "-inf" : meterShown.toFixed(1);
+  num.classList.toggle("clip", meterShown > 0);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* ---------- escala: o painel de 640x400 ocupa a janela inteira ---------- */
+function fit() {
+  const s = Math.min(innerWidth / 640, innerHeight / 400);
+  const panel = $("#panel");
+  panel.style.transform = `scale(${s})`;
+  panel.style.left = ((innerWidth - 640 * s) / 2) + "px";
+  panel.style.top = ((innerHeight - 400 * s) / 2) + "px";
+}
+addEventListener("resize", fit);
+fit();
+
+/* ---------- abertura ---------- */
+ready = true;
+if (hasJuce) {
+  // no plugin o estado vem do host: NUNCA reaplicar o preset 0; os valores chegam assíncronos, então tenta de novo
+  detectPreset();
+  setTimeout(detectPreset, 300);
+  setTimeout(detectPreset, 1200);
+} else applyPreset(0);
+</script>
+</body>
+</html>
