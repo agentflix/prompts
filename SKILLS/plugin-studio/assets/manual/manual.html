@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>BRICKR — Manual</title>
+<style>
+  :root{
+    --ink:#15171a; --ink2:#3d434b; --ink3:#6b7280; --line:#dfe3e8;
+    --acc:#12a89f; --acc-d:#0b7d77; --bg:#ffffff; --soft:#f5f7f8;
+    --mono:ui-monospace,"SF Mono",Menlo,monospace;
+    --font:"SF Pro Display",Inter,"Segoe UI",system-ui,-apple-system,sans-serif;
+  }
+  @page{ size:A4; margin:0; }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; background:var(--bg); color:var(--ink); font:15px/1.55 var(--font); -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  h1,h2,h3{ margin:0; font-weight:800; letter-spacing:-.01em; }
+  h2{ font-size:22px; margin:0 0 4px; }
+  h3{ font-size:15px; margin:18px 0 6px; }
+  p{ margin:0 0 9px; }
+  ul,ol{ margin:0 0 10px 18px; padding:0; }
+  li{ margin:0 0 4px; }
+  code,.mono{ font-family:var(--mono); font-size:13px; }
+  .lead{ color:var(--ink2); font-size:16px; }
+  .muted{ color:var(--ink3); }
+  .small{ font-size:12.5px; color:var(--ink3); }
+  .acc{ color:var(--acc-d); }
+  b,strong{ font-weight:700; }
+  table{ width:100%; border-collapse:collapse; margin:6px 0 14px; font-size:13.5px; }
+  th,td{ text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th{ font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink3); border-bottom:1.5px solid var(--ink); }
+  td.num,th.num{ text-align:right; font-variant-numeric:tabular-nums; }
+  tr:nth-child(even) td{ background:#fafbfc; }
+
+  /* capa */
+  .cover{ height:297mm; width:210mm; display:flex; flex-direction:column; justify-content:space-between;
+          background:#101114; color:#eef1f3; padding:26mm 20mm 18mm; page-break-after:always; }
+  .cover .brand{ font:900 46px/1 var(--font); letter-spacing:.02em; }
+  .cover .brand i{ font-style:normal; color:#4fd8d2; }
+  .cover .sub{ font:600 12px/1.4 var(--font); letter-spacing:.32em; color:#8b939c; margin-top:8px; }
+  .cover .shot{ margin:12mm 0 0; border-radius:3mm; overflow:hidden; box-shadow:0 6mm 18mm rgba(0,0,0,.55); border:1px solid #23262b; }
+  .cover .shot img{ display:block; width:100%; }
+  .cover .meta{ display:flex; justify-content:space-between; align-items:flex-end; font-size:11px; letter-spacing:.1em; color:#8b939c; }
+  .cover .meta b{ color:#4fd8d2; letter-spacing:.14em; }
+  .cover h1{ font-size:30px; letter-spacing:.06em; margin-top:10mm; }
+  .cover .kicker{ color:#4fd8d2; font:700 11px/1 var(--font); letter-spacing:.28em; }
+
+  section{ padding:17mm 16mm 16mm; }
+  section + section{ padding-top:6mm; }
+  section.brk{ page-break-before:always; padding-top:17mm; }
+  section.first{ padding-top:17mm; }
+  h2,h3{ page-break-after:avoid; }
+  table,.card,.note,.warn,dl.kv{ break-inside:avoid; }
+  .shead{ display:flex; align-items:baseline; gap:10px; border-bottom:1.5px solid var(--ink); padding-bottom:6px; margin-bottom:12px; }
+  .shead .n{ font:800 12px/1 var(--mono); color:var(--acc-d); letter-spacing:.06em; }
+
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:10px 18px; }
+  .card{ border:1px solid var(--line); border-radius:4px; padding:10px 12px; background:var(--soft); break-inside:avoid; }
+  .card h3{ margin:0 0 4px; font-size:13px; letter-spacing:.04em; text-transform:uppercase; color:var(--ink2); }
+  .card p{ margin:0; font-size:13.5px; }
+
+  .flow{ display:flex; flex-wrap:wrap; align-items:center; gap:5px; margin:10px 0 14px; }
+  .flow span{ border:1px solid var(--line); border-radius:3px; padding:4px 7px; font-size:11.5px; background:#fff; }
+  .flow span.hot{ border-color:var(--acc); color:var(--acc-d); font-weight:700; }
+  .flow em{ color:var(--ink3); font-style:normal; }
+
+  .note{ border-left:3px solid var(--acc); background:#f2fbfa; padding:8px 12px; margin:10px 0 14px; font-size:13.5px; }
+  .warn{ border-left:3px solid #e0a800; background:#fffaf0; padding:8px 12px; margin:10px 0 14px; font-size:13.5px; }
+  .kv{ display:grid; grid-template-columns:38mm 1fr; gap:2px 10px; font-size:13.5px; margin:4px 0 12px; }
+  .kv dt{ color:var(--ink3); }
+  .kv dd{ margin:0; font-variant-numeric:tabular-nums; }
+</style>
+</head>
+<body>
+
+<!-- ============ CAPA ============ -->
+<div class="cover">
+  <div>
+    <div class="brand">BRICK<i>R</i></div>
+    <div class="sub">ULTRA MAXIMIZER</div>
+    <h1>MANUAL DO USUÁRIO</h1>
+    <div class="shot"><img src="painel.png" alt="Painel do BRICKR"></div>
+  </div>
+  <div class="meta">
+    <div><b>BULNESS AUDIO</b><br>VERSÃO 0.1.0 · VST3 · AU · STANDALONE</div>
+    <div>PT-BR</div>
+  </div>
+</div>
+
+<!-- ============ 1 ============ -->
+<section class="first">
+  <div class="shead"><span class="n">01</span><h2>O que é o BRICKR</h2></div>
+  <p class="lead">Um maximizer de pico para master e bus. <b>THRESHOLD</b> empurra o nível, <b>OUT CEILING</b> é o teto de saída, e o limitador segura os transientes com lookahead — sem saturar o material.</p>
+
+  <h3>Cadeia de sinal</h3>
+  <div class="flow">
+    <span>entrada</span><em>→</em>
+    <span class="hot">ganho = ceiling − threshold</span><em>→</em>
+    <span>detector de pico</span><em>→</em>
+    <span>mínimo na janela (lookahead)</span><em>→</em>
+    <span>ataque instantâneo</span><em>→</em>
+    <span>release (1 polo)</span><em>→</em>
+    <span class="hot">ARC</span><em>→</em>
+    <span>áudio atrasado</span><em>→</em>
+    <span class="hot">IDR</span><em>→</em>
+    <span>saída</span>
+  </div>
+
+  <div class="grid2">
+    <div class="card"><h3>Threshold = drive</h3><p>Baixar o threshold aumenta o ganho de entrada <b>e</b> o makeup na mesma medida. O material fica mais alto e o limitador trabalha mais.</p></div>
+    <div class="card"><h3>Ceiling = nível de saída</h3><p>É o teto real. Baixar o ceiling deixa tudo mais baixo e abre espaço para o limitador segurar picos.</p></div>
+    <div class="card"><h3>Lookahead 1,33 ms</h3><p>O ganho é calculado com 64 amostras de antecedência (48 kHz): nenhuma amostra passa do teto, sem overshoot.</p></div>
+    <div class="card"><h3>Sem saturação</h3><p>O BRICKR só aplica ganho: THD medida no teto é 0,000 %. A cor vem do material, não do limitador.</p></div>
+  </div>
+
+  <div class="note"><b>Regra rápida:</b> para “mais alto sem distorcer”, desça o THRESHOLD até a redução (ATTEN) chegar a 3–5 dB no trecho mais forte. Mexeu no ceiling? O nível de saída muda, o caráter não.</div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section>
+  <div class="shead"><span class="n">02</span><h2>O painel</h2></div>
+  <p class="muted">Da esquerda para a direita: threshold, link, out ceiling, release/ARC, atenuação e IDR.</p>
+  <table>
+    <tr><th style="width:34mm">Seção</th><th>O que faz</th></tr>
+    <tr><td><b>THRESHOLD</b></td><td>Slider com escala 0 a −30 dB. É o drive. Os dois medidores ao lado mostram o pico de entrada L/R; embaixo, o pico desde o último clique (clique para zerar).</td></tr>
+    <tr><td><b>LINK</b></td><td>Botão de setas entre as colunas. Ligado, THRESHOLD e OUT CEILING andam juntos (mesmo dB, mesma posição). Desligado, cada um mexe sozinho.</td></tr>
+    <tr><td><b>OUT CEILING</b></td><td>Teto de saída, 0 a −30 dB. Medidores de saída e pico, iguais aos da esquerda.</td></tr>
+    <tr><td><b>RELEASE</b></td><td>Tempo de recuperação, 0,01 a 1000 ms (escala log). Só vale com o <b>ARC</b> desligado.</td></tr>
+    <tr><td><b>ARC</b></td><td>Auto Release Control: libera rápido picos isolados e devagar reduções sustentadas. Ligado, o slider de release é ignorado.</td></tr>
+    <tr><td><b>ATTEN</b></td><td>Quanta redução o limitador está aplicando agora, em dB (0 a 30).</td></tr>
+    <tr><td><b>IDR</b></td><td>Seção de saída digital: QUANTIZE (bits), DITHER e SHAPING.</td></tr>
+  </table>
+
+  <h3>Presets</h3>
+  <p>A barra no rodapé mostra o preset atual. As setas ◀ ▶ percorrem a lista; clicar no nome abre o navegador com <b>categorias</b> (Geral, Master, Mix, Instrumento), busca por nome/tag, favoritos e recentes. O botão <b>Save</b> grava o ajuste atual como preset de usuário.</p>
+  <p class="small">Um asterisco depois do nome indica que você mexeu em algo desde que o preset foi carregado.</p>
+  <p class="small">O botão <b>?</b> na barra abre este manual em PDF (é o mesmo arquivo, embutido no plug-in).</p>
+</section>
+
+<!-- ============ 3 ============ -->
+<section>
+  <div class="shead"><span class="n">03</span><h2>Parâmetros</h2></div>
+  <table>
+    <tr><th style="width:32mm">Parâmetro</th><th class="num" style="width:24mm">Faixa</th><th class="num" style="width:20mm">Padrão</th><th>Observação</th></tr>
+    <tr><td>Threshold</td><td class="num">−30 … 0 dB</td><td class="num">−6,0</td><td>Drive. Descer = mais alto e mais redução.</td></tr>
+    <tr><td>Out Ceiling</td><td class="num">−30 … 0 dB</td><td class="num">−0,2</td><td>Teto de saída. O pico nunca passa daqui.</td></tr>
+    <tr><td>Release</td><td class="num">0,01 … 1000 ms</td><td class="num">100</td><td>Log. Ignorado com ARC ligado.</td></tr>
+    <tr><td>ARC</td><td class="num">off / on</td><td class="num">on</td><td>Release automático por programa.</td></tr>
+    <tr><td>Link</td><td class="num">off / on</td><td class="num">on</td><td>Prende threshold + ceiling.</td></tr>
+    <tr><td>Quantize</td><td class="num">24/22/20/18/16/8</td><td class="num">24</td><td>Profundidade de saída do IDR.</td></tr>
+    <tr><td>Dither</td><td class="num">Off/Type1/Type2</td><td class="num">Type1</td><td>Type1 = TPDF. Type2 = sem dither.</td></tr>
+    <tr><td>Shaping</td><td class="num">None…Ultra</td><td class="num">Normal</td><td>Curva de ruído do IDR.</td></tr>
+  </table>
+
+  <h3>Como o ganho é calculado</h3>
+  <p>O ganho de repouso é <code>ceiling − threshold</code> em dB. Para um sinal abaixo do threshold, a saída é simplesmente o material deslocado por esse valor. Quando o pico passa do threshold, o limitador puxa o ganho para que a saída pare no ceiling.</p>
+  <div class="note"><b>Exemplo:</b> threshold −6 dB e ceiling −1 dB → o material sobe 5 dB. Um pico que chegaria a 0 dBFS sai em −1 dBFS, com 6 dB de redução.</div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section>
+  <div class="shead"><span class="n">04</span><h2>Na prática</h2></div>
+
+  <h3>Master (streaming)</h3>
+  <ol>
+    <li>Escolha o preset <b>Streaming</b> (ceiling −1,0 dB) ou parta do <b>Default</b>.</li>
+    <li>Toque o trecho mais forte e desça o THRESHOLD até o ATTEN marcar 3–4 dB.</li>
+    <li>Ajuste o OUT CEILING para o alvo de entrega (−1,0 dB é seguro para codecs).</li>
+    <li>Compare com o bypass do host: o volume percebido deve subir, o timbre não.</li>
+  </ol>
+
+  <h3>Bus (bateria, paralelo, cola)</h3>
+  <ol>
+    <li><b>Drum Bus</b>: release curto e ARC off para devolver o soco entre as batidas.</li>
+    <li><b>Bus Glue</b>: release longo e ARC on para colar sem bombear.</li>
+    <li><b>Parallel</b>: redução forte no bus, misture o sinal processado por baixo do seco.</li>
+  </ol>
+
+  <h3>Instrumento</h3>
+  <p>Os presets de instrumento (Kick, Snare/Clap, Bass, Vocal, Synth, Hats/Perc, Keys) foram calibrados para o material indicado no nome: cada um tem um alvo de redução e um tempo de release próprios.</p>
+
+  <div class="warn"><b>True peak:</b> o BRICKR controla <b>pico de amostra</b>. Em material muito agudo, o pico entre amostras pode passar ~0,3 dB do ceiling. Para entrega com −1 dBTP, use ceiling −1,3 dB.</div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section class="brk">
+  <div class="shead"><span class="n">05</span><h2>Presets de fábrica</h2></div>
+  <table><tr><th style='width:34mm'>Preset</th><th class='num'>Threshold</th><th class='num'>Ceiling</th><th class='num'>Release</th><th class='num'>ARC</th><th>IDR</th></tr><tr><td colspan="6" style="background:#eef2f3;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:11px;color:#3d434b">Geral</td></tr><tr><td><b>Default</b></td><td class='num'>-6,0 dB</td><td class='num'>-0,2 dB</td><td class='num'>100 ms</td><td class='num'>on</td><td class='num' style='text-align:left'>24 bits · Type1 · Normal</td></tr><tr><td colspan="6" style="background:#eef2f3;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:11px;color:#3d434b">Master</td></tr><tr><td><b>Club</b></td><td class='num'>-8,0 dB</td><td class='num'>-0,3 dB</td><td class='num'>60 ms</td><td class='num'>on</td><td class='num' style='text-align:left'>24 bits · Type1 · Normal</td></tr><tr><td><b>Streaming</b></td><td class='num'>-6,0 dB</td><td class='num'>-1,0 dB</td><td class='num'>120 ms</td><td class='num'>on</td><td class='num' style='text-align:left'>24 bits · Type1 · Normal</td></tr><tr><td><b>Loud</b></td><td class='num'>-11,0 dB</td><td class='num'>-0,1 dB</td><td class='num'>40 ms</td><td class='num'>on</td><td class='num' style='text-align:left'>24 bits · Type1 · Normal</td></tr><tr><td><b>Gentle</b></td><td class='num'>-5,0 dB</td><td class='num'>-0,5 dB</td><td class='num'>250 ms</td><td class='num'>on</td><td class='num' style='text-align:left'>24 bits · Type1 · Normal</td></tr><tr><td><b>CD 16 Bit</b></td><td class='num'>-7,0 dB</td><td class='num'>-0,3 dB</td><td class='num'>80 ms</td><td class='num'>on</td><td class='num' style='text-align:left'>16 bits · Type2 · Normal</td></tr><tr><td colspan="6" style="background:#eef2f3;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:11px;color:#3d434b">Mix</td></tr><tr><td><b>Bus Glue</b></td><td class='num'>-6,0 dB</td><td class='num'>-1,0 dB</td><td class='num'>200 ms</td><td class='num'>on</td><td class='num' style='text-align:left'>24 bits · Type1 · Normal</td></tr><tr><td><b>Drum Bus</b></td><td class='num'>-7,0 dB</td><td class='num'>-0,5 dB</td><td class='num'>25 ms</td><td class='num'>off</td><td class='num' style='text-align:left'>24 bits · Type1 · Normal</td></tr><tr><td><b>Parallel</b></td><td class='num'>-15,0 dB</td><td class='num'>-3,0 dB</td><td class='num'>15 ms</td><td class='num'>off</td><td class='num' style='text-align:left'>24 bits · Type1 · Normal</td></tr><tr><td><b>Safety</b></td><td class='num'>-4,0 dB</td><td class='num'>-1,0 dB</td><td class='num'>100 ms</td><td class='num'>on</td><td class='num' style='text-align:left'>24 bits · Type1 · Normal</td></tr><tr><td colspan="6" style="background:#eef2f3;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:11px;color:#3d434b">Instrumento</td></tr><tr><td><b>Kick</b></td><td class='num'>-7,0 dB</td><td class='num'>-0,5 dB</td><td class='num'>8 ms</td><td class='num'>off</td><td class='num' style='text-align:left'>24 bits · Type1 · Normal</td></tr><tr><td><b>Snare/Clap</b></td><td class='num'>-9,0 dB</td><td class='num'>-0,5 dB</td><td class='num'>15 ms</td><td class='num'>off</td><td class='num' style='text-align:left'>24 bits · Type1 · Normal</td></tr><tr><td><b>Bass</b></td><td class='num'>-6,0 dB</td><td class='num'>-0,5 dB</td><td class='num'>90 ms</td><td class='num'>on</td><td class='num' style='text-align:left'>24 bits · Type1 · Normal</td></tr><tr><td><b>Vocal</b></td><td class='num'>-6,0 dB</td><td class='num'>-1,0 dB</td><td class='num'>120 ms</td><td class='num'>on</td><td class='num' style='text-align:left'>24 bits · Type1 · Normal</td></tr><tr><td><b>Synth</b></td><td class='num'>-6,0 dB</td><td class='num'>-0,8 dB</td><td class='num'>80 ms</td><td class='num'>on</td><td class='num' style='text-align:left'>24 bits · Type1 · Normal</td></tr><tr><td><b>Hats/Perc</b></td><td class='num'>-8,0 dB</td><td class='num'>-1,0 dB</td><td class='num'>10 ms</td><td class='num'>off</td><td class='num' style='text-align:left'>24 bits · Type1 · Normal</td></tr><tr><td><b>Keys</b></td><td class='num'>-5,1 dB</td><td class='num'>-1,0 dB</td><td class='num'>200 ms</td><td class='num'>on</td><td class='num' style='text-align:left'>24 bits · Type1 · Normal</td></tr></table>
+  <p class="small">Valores de THRESHOLD/CEILING/RELEASE em dB e ms; ARC, Quantize, Dither e Shaping como no painel. O alvo de GR é a redução de pico usada na calibração de cada material.</p>
+</section>
+
+<!-- ============ 6 ============ -->
+<section>
+  <div class="shead"><span class="n">06</span><h2>IDR em detalhe</h2></div>
+  <p class="lead">O IDR é a seção de saída digital: define em quantos bits o sinal sai, com que dither e com que formato de ruído.</p>
+
+  <h3>Quantize</h3>
+  <p>24, 22, 20, 18, 16 e 8 bits. Para master, deixe em 24; para CD, 16; 8 bits existe para efeitos e testes.</p>
+
+  <h3>Dither</h3>
+  <ul>
+    <li><b>Type1 (TPDF)</b> — o padrão. Ruído triangular de ±1 LSB, descorrelacionado entre canais. Some o truncamento sem somar distorção audível.</li>
+    <li><b>Type2</b> — sem dither: só truncamento com shaping. Útil quando o material já vem ditherizado.</li>
+    <li><b>Off</b> — nenhum processo de dither.</li>
+  </ul>
+
+  <h3>Shaping</h3>
+  <p>Quatro curvas (None, Moderate, Normal, Ultra) que empurram o ruído de quantização para o agudo, onde o ouvido é menos sensível. Cada degrau levanta o piso total em ~6 dB e deixa os graves mais limpos.</p>
+  <table>
+    <tr><th>Bits</th><th class="num">None</th><th class="num">Moderate</th><th class="num">Normal</th><th class="num">Ultra</th></tr>
+    <tr><td>24</td><td class="num">−144,5</td><td class="num">−138,3</td><td class="num">−132,5</td><td class="num">−126,6</td></tr>
+    <tr><td>20</td><td class="num">−120,4</td><td class="num">−114,2</td><td class="num">−108,4</td><td class="num">−102,5</td></tr>
+    <tr><td>16</td><td class="num">−96,3</td><td class="num">−90,2</td><td class="num">−84,4</td><td class="num">−78,4</td></tr>
+  </table>
+  <p class="small">Piso de ruído medido em dBFS, sem sinal. Para conferir: silêncio na entrada, 16 bits e Shaping Ultra — o chiado deve ficar em torno de −78 dBFS.</p>
+
+  <div class="note"><b>Dica:</b> se o material vai passar por codec (streaming), 16 bits com dither e shaping Normal costuma ser suficiente; para arquivo, 24 bits sem dither.</div>
+</section>
+
+<!-- ============ 7 ============ -->
+<section class="brk">
+  <div class="shead"><span class="n">07</span><h2>Especificações e instalação</h2></div>
+
+  <h3>Técnicas</h3>
+  <dl class="kv">
+    <dt>Formatos</dt><dd>VST3, AU (aufx <code>Brkr</code>), Standalone</dd>
+    <dt>Sample rates</dt><dd>44,1 a 192 kHz</dd>
+    <dt>Latência</dt><dd>64 amostras a 48 kHz (1,33 ms) · 128 a 96 kHz · 256 a 192 kHz</dd>
+    <dt>Canais</dt><dd>mono ou estéreo (linkado)</dd>
+    <dt>CPU</dt><dd>~0,2 % de um núcleo a 48 kHz, ~1 % a 192 kHz</dd>
+    <dt>Pico</dt><dd>de amostra (não true peak)</dd>
+  </dl>
+
+  <h3>Instalação</h3>
+  <ul>
+    <li><b>VST3:</b> <code>~/Library/Audio/Plug-Ins/VST3/BRICKR.vst3</code></li>
+    <li><b>AU:</b> <code>~/Library/Audio/Plug-Ins/Components/BRICKR.component</code></li>
+    <li><b>Standalone:</b> o app BRICKR, para tocar sem DAW</li>
+  </ul>
+  <p>Se o plug-in não aparecer na lista do host, faça um rescan de plug-ins ou reinicie o host. No Logic, o AU pode ser exigido em <i>Preferences → Plug-in Manager</i>.</p>
+
+  <h3>Problemas comuns</h3>
+  <table>
+    <tr><th style="width:52mm">Sintoma</th><th>Causa e solução</th></tr>
+    <tr><td>“Está cortando” / som sujo</td><td>Threshold baixo demais para o material: aumente o THRESHOLD até o ATTEN voltar a 3–5 dB.</td></tr>
+    <tr><td>Não faz volume</td><td>Confira o OUT CEILING (se estiver muito baixo, a saída fica baixa) e se o LINK está prendendo os dois.</td></tr>
+    <tr><td>Release não muda nada</td><td>Com ARC ligado o slider é ignorado por projeto. Desligue o ARC para controlar o release manualmente.</td></tr>
+    <tr><td>Chiado no silêncio</td><td>IDR com dither/shaping em bits baixos é audível de propósito. Para silêncio absoluto, Dither Type2.</td></tr>
+  </table>
+</section>
+
+<!-- ============ 8 ============ -->
+<section class="brk">
+  <div class="shead"><span class="n">08</span><h2>Boas práticas</h2></div>
+  <ul>
+    <li>Limite no fim da cadeia. Compressão e EQ antes; o maximizer fecha o trabalho.</li>
+    <li>Compare com o bypass <b>igualando o volume</b> — mais alto quase sempre parece melhor.</li>
+    <li>Deixe 0,2 a 0,5 dB de folga entre o pico do material e o ceiling para o codec respirar.</li>
+    <li>Use o ATTEN como termômetro: se ficar acima de ~6 dB o tempo todo, o material já está muito comprimido.</li>
+    <li>Em bus, prefira ARC ligado; em bateria e instrumentos de ataque, ARC desligado + release curto.</li>
+    <li>Salve variações por faixa como presets de usuário — o navegador guarda favoritos e recentes.</li>
+  </ul>
+
+  <h3>Atalhos do navegador</h3>
+  <p>Categorias à esquerda, busca no topo, lista no meio e ficha do preset à direita com THRESHOLD, CEILING, RELEASE, ARC, IDR e a redução média medida. <b>CARREGAR</b> aplica, <b>SALVAR COMO</b> cria um novo, <b>FAVORITO</b> marca e <b>EXPORTAR</b> gera um arquivo do preset.</p>
+
+  <p class="small" style="margin-top:18mm">BRICKR 0.1.0 · Bulness Audio · este manual descreve o comportamento da versão atual. Especificações podem mudar sem aviso.</p>
+</section>
+
+</body>
+</html>
