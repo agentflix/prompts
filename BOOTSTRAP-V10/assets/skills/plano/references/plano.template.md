@@ -33,7 +33,7 @@ Várias sessões, módulo novo ou área de risco. Pre-mortem: imagine que a entr
 **C**
 - QUANDO <evento>, O SISTEMA DEVE <resposta observável>
 - SE <erro>, ENTÃO O SISTEMA DEVE <resposta>
-**E** `<comando que roda só o teste desta task>` → <resultado esperado>
+**E** `<comando que roda só o teste desta task>` → <resultado esperado>. Área de risco: + mutação (inverter `<arquivo:linha>` faz o teste falhar)
 **Cuidado** <armadilha concreta, se houver; senão apague a linha>
 
 ### T2 — <...> · [P] · depende: T1 · agente: mecanico · estado: ⬜

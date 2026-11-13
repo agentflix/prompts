@@ -29,7 +29,7 @@ Cada task:
 - **A**: arquivos exatos, `(novo)` ou `(editar: o que muda)`. Teste da task também entra.
 - **Ref**: o vizinho a imitar, com linhas.
 - **C**: cláusulas EARS (`QUANDO … O SISTEMA DEVE …`, `SE <erro>, ENTÃO …`), incluindo o caminho de erro. Cláusula que você não sabe escrever é comportamento não definido: volte ao passo 2.
-- **E**: o comando que roda só o teste desta task e o resultado esperado. Nunca a suíte inteira.
+- **E**: o comando que roda só o teste desta task e o resultado esperado. Nunca a suíte inteira. Task de área de risco (dinheiro, baixa, autorização, dado pessoal, migração): acrescente a prova de mutação, "apague a asserção principal (ou inverta a condição em `<arquivo:linha>`) e o teste falha". Fora disso, não: mutação em toda task custa tempo e raramente acha algo.
 - **Cuidado**: a armadilha concreta, se houver.
 
 Tamanho de task: o que um executor fecha em uma rodada, com 1 a 5 arquivos. Maior: quebre.

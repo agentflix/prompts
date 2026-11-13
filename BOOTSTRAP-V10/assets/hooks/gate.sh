@@ -74,6 +74,22 @@ if [ -z "$turn" ]; then
 fi
 [ "$last_turn" = "$turn" ] || tries=0
 
+# Subagente ainda trabalhando nesta sessão: o turno da conversa principal acabou, mas o
+# código está pela metade. Gate agora reprovaria arquivo em escrita e gastaria tentativa.
+# O próximo Stop (quando o subagente voltar) roda o gate.
+busy="$(py -c '
+import json, sys, time
+try:
+    st = json.load(open(sys.argv[1], encoding="utf-8"))
+except Exception:
+    sys.exit()
+print(sum(1 for v in (st.get("agents") or {}).values() if time.time() - v.get("t", 0) < 1800))
+' "$STATE/status/$(printf '%s' "$session" | tr -c 'A-Za-z0-9_.-' '_' | cut -c1-80).json" 2>/dev/null)"
+case "$busy" in ''|0) ;; *)
+  log_busy() { printf '%s\t0\t0\tsubagente\n' "$(date +%Y-%m-%dT%H:%M:%S)" >> "$STATE/gate-log.tsv"; }
+  log_busy; exit 0 ;;
+esac
+
 # {changed}: arquivos alterados que ainda existem, cada um entre aspas de shell.
 cmd="$GATE_FAST"
 case "$cmd" in *"{changed}"*)

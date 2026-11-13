@@ -234,6 +234,14 @@ sed -i.bak 's/estado: 🔄/estado: ⬜/' .context/work/00001-cpf.md; rm -f .cont
 echo '{"session_id":"S8","tool_name":"Edit","tool_input":{"file_path":"src/nao.ts"}}' | PV pre >/dev/null
 chk "$(grep -c '### T2 .*estado: 🔄' .context/work/00001-cpf.md)" 1 "work: plano em .context/work/ é o ativo, sem depender do status"
 chk "$(echo '{"tool_name":"Write","tool_input":{"file_path":".context/work/00001-cpf.md"}}' | PV plano | grep -c 'já existe')" 0 "work: checador trata como em execução"
+chk "$(PV marca T3 | grep -c '✅')$(grep -c '### T3 .*estado: ✅' .context/work/00001-cpf.md)" 11 "marca: CLI fecha a task com a trava do hook"
+chk "$(python3 -B -c 'import importlib.util as u,sys;sp=u.spec_from_file_location("pv",sys.argv[1]);m=u.module_from_spec(sp);sp.loader.exec_module(m);m.field=lambda b,k:b;print(m.a_paths(["- app/Cobr.php (editar, criado na T9)","- e.g. Foo.bar() e cfg.yml"]))' .claude/hooks/prevec.py)" "[('app/Cobr.php', 'editar'), ('cfg.yml', '')]" "escopo: caminho sem crase entra no A"
+cp .claude/hooks/gates.conf gates.bak; printf "GATE_FAST='false'\n" > .claude/hooks/gates.conf; echo x > novo-gate.txt
+J '{"session_id":"G1","hook_event_name":"SubagentStart","agent_id":"g1","agent_type":"executor"}'
+chk "$(echo '{"session_id":"G1","stop_hook_active":false}' | /bin/bash .claude/hooks/gate.sh >/dev/null 2>&1; echo $?)" 0 "gate: subagente rodando não reprova arquivo em escrita"
+J '{"session_id":"G1","hook_event_name":"SubagentStop","agent_id":"g1"}'
+chk "$(echo '{"session_id":"G1","stop_hook_active":false}' | /bin/bash .claude/hooks/gate.sh >/dev/null 2>&1; echo $?)" 2 "gate: subagente voltou, gate roda"
+mv gates.bak .claude/hooks/gates.conf; rm -f novo-gate.txt
 D() { python3 -c 'import json,sys;print(json.dumps({"session_id":"S7","hook_event_name":"UserPromptSubmit","prompt":sys.argv[1]}))' "$1" | PV status | grep -c "Modo técnico"; }
 chk "$(D 'detalhe')$(D 'detalha a fila de testes')$(D 'me explica o técnico disso')" 111 "detalhe: pedido curto ou que começa com a palavra vira modo técnico"
 chk "$(D 'corrige o bug. Um detalhe: o login quebra quando a senha tem espaço no começo e no fim')" 0 "detalhe: palavra no meio de pedido longo não dispara"

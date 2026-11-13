@@ -15,6 +15,8 @@
            para a skill retro achar trabalho manual repetido que vale virar script ou skill.
   rotulo   PreToolUse no tool Agent. Põe o modelo na frente da descrição do subagente
            ("Sonnet · Escrevendo testes"), para a lista de agentes mostrar quem roda onde.
+  marca    Linha de comando: prevec.sh marca T3 [ok|andamento]. Única forma de mudar o estado
+           à mão; editar o estado no plano disputa com o hook.
   plano    PostToolUse em Write/Edit de .context/planos/*.md ou .context/work/*.md, ou na linha de comando
            (prevec.sh plano <arquivo>). Checa o plano de forma determinística.
 
@@ -241,11 +243,15 @@ def a_paths(body):
     for line in field(body, "A"):
         if re.match(r"^\s*(Ref|Referência)\s*:", line.strip(), re.I):
             continue
-        for m in re.finditer(r"`([^`]+)`\s*(\(([^)]*)\))?", line):
-            path = m.group(1).strip()
-            if " " in path or ("/" not in path and "." not in path):
-                continue  # comando ou símbolo, não caminho
-            mark = (m.group(3) or "").split(":")[0].split("—")[0].strip().lower()
+        found = list(re.finditer(r"`(?P<p>[^`]+)`\s*(?:\((?P<n>[^)]*)\))?", line))
+        if not found:  # caminho sem crase: "- app/Http/X.php (editar, criado na T9)"
+            found = list(re.finditer(
+                r"(?<![\w/.-])(?P<p>(?:[\w.-]+/)+[\w.-]+|[\w-]+(?:\.[\w-]+)*\.[a-z]{2,5})(?![\w(])\s*(?:\((?P<n>[^)]*)\))?", line))
+        for m in found:
+            path = m.group("p").strip().rstrip(".,;:")
+            if " " in path or ("/" not in path and "." not in path) or re.match(r"^[\d.]+$", path):
+                continue  # comando, símbolo ou número, não caminho
+            mark = re.split(r"[:,—;\s]", (m.group("n") or "").strip().lower(), maxsplit=1)[0]
             res.append((path, mark))
     return res
 
@@ -814,11 +820,29 @@ def cmd_plano(d, root, argv):
     return 0
 
 
+def cmd_marca(root, rest):
+    """prevec.sh marca T3 [ok|andamento]: marca a task pelo mesmo caminho do hook (com trava),
+    para o agente não editar o estado à mão e brigar com o hook. Estado nunca regride."""
+    if not rest or not re.match(r"^T\d+(\.\d+)*$", rest[0]):
+        print("uso: prevec.sh marca T3 [ok|andamento]", file=sys.stderr)
+        return 2
+    sym = "🔄" if (rest[1:] and rest[1].lower().startswith("and")) else "✅"
+    plan = active_plan(root, rest[0])
+    if not plan:
+        print(f"{rest[0]} não está em nenhum plano ativo (.context/work/)", file=sys.stderr)
+        return 1
+    mark_plan(root, rest[0], sym)
+    print(f"{rest[0]} {sym} em {os.path.relpath(plan, root)}")
+    return 0
+
+
 def main(argv):
     if not argv:
         print(__doc__)
         return 0
     sub, rest = argv[0], argv[1:]
+    if sub == "marca":
+        return cmd_marca(project_root({}), rest)
     d = {} if (sub == "plano" and rest) else read_input()
     root = project_root(d)
     try:

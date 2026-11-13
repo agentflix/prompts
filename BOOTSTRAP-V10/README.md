@@ -12,7 +12,7 @@ Na raiz do projeto:
 Leia e execute BOOTSTRAP-V10/bootstrap-v10.md
 ```
 
-Wizard em caixas de opção (até quatro chamadas). Auditoria depois: `bash BOOTSTRAP-V10/assets/doctor.sh`. Teste do kit: `bash BOOTSTRAP-V10/assets/tests/hooks-test.sh` (89 casos).
+Wizard em caixas de opção (até quatro chamadas). Auditoria depois: `bash BOOTSTRAP-V10/assets/doctor.sh`. Teste do kit: `bash BOOTSTRAP-V10/assets/tests/hooks-test.sh` (95 casos).
 
 ## O fluxo
 

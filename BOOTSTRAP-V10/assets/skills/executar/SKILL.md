@@ -10,7 +10,7 @@ O plano já decidiu. Aqui é ritmo: cada task fecha com a própria prova e a con
 ## Preparar
 
 1. Plano ativo: `.context/work/*.md`. Plano ainda em `.context/planos/`: mova para `.context/work/` e ponha `status: em-execucao`. Mais de um em `work/`: pergunte qual.
-2. Estado: no Claude Code, o hook marca a task 🔄 no plano quando você edita um arquivo do A dela ou despacha um subagente com o código (`T3`) na descrição, e ✅ quando o subagente volta `ok` ou você roda o E dela e passa para a próxima. Você só marca ✅ à mão a última task, ou a que não editou arquivo. Se a ferramenta tem lista de tarefas nativa (TaskCreate, plano do Codex, `todowrite`), use o assunto começando pelo código: `T3 — Validar CPF`.
+2. Estado: no Claude Code, o hook marca a task 🔄 no plano quando você edita um arquivo do A dela ou despacha um subagente com o código (`T3`) na descrição, e ✅ quando o subagente volta `ok` ou você roda o E dela e passa para a próxima. Não edite o `estado:` no plano: o hook grava o mesmo arquivo e as duas escritas se atropelam. Para a última task, ou a que não editou arquivo, rode `.claude/hooks/prevec.sh marca T3`. Se a ferramenta tem lista de tarefas nativa (TaskCreate, plano do Codex, `todowrite`), use o assunto começando pelo código: `T3 — Validar CPF`.
 3. `git status --short`: mudança sem commit de antes é task pela metade. Leia o diff e decida com o usuário entre terminar e descartar.
 
 ## Para cada task, na ordem de dependência
