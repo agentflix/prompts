@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plano"
+  short_description: "Plano T.A.C.E checado por máquina para tarefa média ou grande"
+  default_prompt: "Use $plano para planejar esta mudança."

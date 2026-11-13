@@ -1,0 +1,4 @@
+interface:
+  display_name: "Executar"
+  short_description: "Executa o plano task a task, delegando por custo"
+  default_prompt: "Use $executar para executar o plano ativo."

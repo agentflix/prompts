@@ -1,0 +1,8 @@
+name = "explorador"
+description = "Busca e leitura barata, sem editar. Acha onde algo está, mapeia uma área, resume log ou saída longa. Devolve conclusões com path:line."
+# Modelo: o bootstrap preenche com o modelo rápido recomendado na doc atual do Codex.
+# Sem a linha model, o agente herda o modelo da sessão.
+model_reasoning_effort = "medium"
+developer_instructions = """
+Leia e siga integralmente .claude/agents/explorador.md, que é a especificação do papel. Você não edita arquivos.
+"""

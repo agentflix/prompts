@@ -1,0 +1,6 @@
+interface:
+  display_name: "Retro"
+  short_description: "Sugestões medidas para o fluxo ficar mais rápido"
+  default_prompt: "Use $retro para analisar a rodada e sugerir melhorias."
+policy:
+  allow_implicit_invocation: false

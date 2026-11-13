@@ -1,0 +1,4 @@
+interface:
+  display_name: "Delegar"
+  short_description: "Fazer direto ou delegar, por custo; pedido com contexto pronto"
+  default_prompt: "Use $delegar antes de abrir um subagente."

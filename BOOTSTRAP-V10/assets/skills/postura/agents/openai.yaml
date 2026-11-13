@@ -1,0 +1,6 @@
+interface:
+  display_name: "Postura"
+  short_description: "Conservador, equilibrado ou criativo neste projeto"
+  default_prompt: "Use $postura para trocar a postura do agente neste projeto."
+policy:
+  allow_implicit_invocation: false

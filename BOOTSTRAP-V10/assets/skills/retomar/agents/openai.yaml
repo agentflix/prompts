@@ -1,0 +1,4 @@
+interface:
+  display_name: "Retomar"
+  short_description: "Continua a feature longa de onde parou"
+  default_prompt: "Use $retomar para continuar a feature de onde parou."
