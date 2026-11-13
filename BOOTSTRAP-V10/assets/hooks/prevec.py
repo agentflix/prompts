@@ -579,7 +579,12 @@ def cmd_status(d, root):
     sd = state_dir(root)
     path = os.path.join(sd, "status", safe_id(d.get("session_id")) + ".json")
     with locked(path):
-        touched, tasks = _status(d, root, sd, path)
+        touched, tasks, detalhe = _status(d, root, sd, path)
+    if detalhe:
+        emit("UserPromptSubmit", context=(
+            "Modo técnico nesta resposta: o usuário pediu detalhe. Comece pela conclusão e depois dê "
+            "funções, trechos de código, alternativas consideradas e o porquê da escolha. "
+            "Na próxima resposta, volte ao formato em camadas."))
     if touched and touched in tasks:
         m = TASK_CODE.match(tasks[touched].get("subject") or "")
         sym = STATES.get(tasks[touched].get("status"))
@@ -616,6 +621,12 @@ def _status(d, root, sd, path):
         if first and not first.startswith("<"):
             st["pedido"] = resumo(first)
             st["acao"] = None
+        # "detalhe" no começo do pedido (ou pedido curto com a palavra): modo técnico só nesta resposta.
+        low = prompt.strip().lower()
+        if os.environ.get("DETALHE_HOOK", "1") == "1" and (
+                re.match(r"^(detalh|t[eé]cnico\b|como funciona por dentro)", low)
+                or (len(low) <= 60 and re.search(r"\b(detalh\w*|t[eé]cnico)\b", low))):
+            st["_detalhe"] = True
     elif tool in ("Agent", "Task") and ev == "PostToolUse":
         resp = d.get("tool_response")
         text = resp if isinstance(resp, str) else json.dumps(resp, ensure_ascii=False)
@@ -675,10 +686,11 @@ def _status(d, root, sd, path):
     st["total"] = len(tasks)
     st["updated"] = time.time()
     fechar = st.pop("fechar", None)
+    detalhe = st.pop("_detalhe", False)
     save(path, st)
     if fechar:
         mark_plan(root, fechar, "✅")
-    return touched, tasks
+    return touched, tasks, detalhe
 
 
 def cmd_ritmo(d, root):

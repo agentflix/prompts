@@ -6,6 +6,12 @@ model_reasoning_effort = "medium"
 personality = "none"
 # Saída curta escolhida no setup: "low". Saída normal: apague a linha.
 model_verbosity = "low"
+# Estilo de resposta "dev-claro": o bootstrap cola aqui o corpo de .claude/output-styles/dev-claro.md
+# (sem o frontmatter). Só o Codex lê este campo, então não duplica com o AGENTS.md.
+# Outro estilo: apague o bloco.
+developer_instructions = """
+<corpo de .claude/output-styles/dev-claro.md>
+"""
 
 [features]
 hooks = true

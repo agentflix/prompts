@@ -229,5 +229,8 @@ mv .context/planos /tmp/planos.$$
 echo '{"session_id":"S6","tool_name":"Bash","tool_input":{"command":"bash scripts/deploy.sh --x"}}' | PV pre
 chk "$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["acao"])' "$(git rev-parse --git-path prevec)/status/S6.json")" "rodando bash deploy.sh" "pre: sem pasta de planos grava a ação com o nome do script"
 mv /tmp/planos.$$ .context/planos
+D() { python3 -c 'import json,sys;print(json.dumps({"session_id":"S7","hook_event_name":"UserPromptSubmit","prompt":sys.argv[1]}))' "$1" | PV status | grep -c "Modo técnico"; }
+chk "$(D 'detalhe')$(D 'detalha a fila de testes')$(D 'me explica o técnico disso')" 111 "detalhe: pedido curto ou que começa com a palavra vira modo técnico"
+chk "$(D 'corrige o bug. Um detalhe: o login quebra quando a senha tem espaço no começo e no fim')" 0 "detalhe: palavra no meio de pedido longo não dispara"
 echo "== $((n-fails))/$n passaram (V10)"
 [ "$fails" -eq 0 ]
