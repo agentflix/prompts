@@ -36,7 +36,7 @@ Feche a task quando o comando de **E** passar, rodado por você ou visto na resp
 
 ## Fim de fase
 
-Rode o `GATE_FULL` pela fila: `.claude/hooks/tq.sh "<GATE_FULL>"`, com `timeout: 600000` no Bash, ou em background se pode passar de 10 minutos. Vermelho: corrija antes da próxima fase. Na última fase, siga com a skill `ship`, levando a saída do `GATE_FULL` para ele não rodar de novo no mesmo estado.
+Rode `.claude/hooks/tq.sh --fase`: com `GATE_PARTS` no `gates.conf` (monorepo), roda só as partes que o diff tocou; sem ele, o `GATE_FULL`. Use `timeout: 600000` no Bash, ou em background se pode passar de 10 minutos. Vermelho: corrija antes da próxima fase. Na última fase, rode o `GATE_FULL` inteiro (`.claude/hooks/tq.sh "<GATE_FULL>"`) e siga com a skill `ship`, levando a saída. O hook `fila` nega rodar o `GATE_FULL` de novo no mesmo estado do código, então revisor e ship usam essa saída.
 
 ## Pausa
 

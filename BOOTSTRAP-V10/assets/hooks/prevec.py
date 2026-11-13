@@ -265,6 +265,31 @@ def ref_paths(body):
     return res
 
 
+def suggest_plan(path):
+    """Dependência que talvez não exista: as tasks não dividem arquivo e a dependente não cita
+    nenhum arquivo da outra. Só sugestão: a dependência pode ser de comportamento."""
+    try:
+        with open(path, encoding="utf-8") as fh:
+            _, tasks = parse_plan(fh.read())
+    except OSError:
+        return []
+    by = {t["code"]: t for t in tasks}
+    out = []
+    for t in tasks:
+        mine = {p for p, _ in a_paths(t["body"])}
+        text = "\n".join(t["body"])
+        for dep in t["deps"]:
+            dt = by.get(dep)
+            if not dt:
+                continue
+            theirs = {p for p, _ in a_paths(dt["body"])}
+            stems = {os.path.splitext(os.path.basename(p))[0] for p in theirs}
+            if theirs and not (mine & theirs) and not any(s and s in text for s in stems):
+                out.append(f"{t['code']} depende de {dep}, mas não divide arquivo nem cita arquivo dela: "
+                           f"se não usa nada que {dep} cria, tire a dependência (e marque [P] se couber)")
+    return out
+
+
 def check_plan(root, path):
     try:
         with open(path, encoding="utf-8") as fh:
@@ -545,6 +570,10 @@ def cmd_pre(d, root):
         mark_plan(root, mark[1], "🔄")
     elif code and tool in ("Agent", "Task"):
         mark_plan(root, code, "🔄")
+        with locked(path):  # SubagentStart liga este código ao agent_id; SubagentStop fecha a task
+            st2 = load(path, {})
+            st2["pend"] = (st2.get("pend") or [])[-9:] + [code]
+            save(path, st2)
     if tool in ("Edit", "Write", "MultiEdit", "NotebookEdit") or (tool == "apply_patch"):
         cmd_escopo(d, root)
     elif tool in ("Agent", "Task"):
@@ -648,8 +677,18 @@ def _status(d, root, sd, path):
         aid = d.get("agent_id") or str(time.time())
         typ = d.get("agent_type") or "subagente"
         lab = agent_model(root, typ)
-        st["agents"][aid] = {"type": f"{typ}·{lab.split()[0]}" if lab else typ, "t": time.time()}
+        pend = st.get("pend") or []
+        st["agents"][aid] = {"type": f"{typ}·{lab.split()[0]}" if lab else typ, "t": time.time(),
+                             "code": pend.pop(0) if pend else None}
+        st["pend"] = pend
     elif ev == "SubagentStop":
+        # Background também fecha: o SubagentStop traz a última mensagem do subagente.
+        ag = st["agents"].get(d.get("agent_id") or "") or {}
+        msg = d.get("last_assistant_message") if isinstance(d.get("last_assistant_message"), str) else ""
+        m = re.search(r"^\W*TASK:\s*(T\d+(?:\.\d+)*)", msg, re.M | re.I)
+        code = (m.group(1) if m else None) or ag.get("code")
+        if code and re.search(r"VEREDITO:\W*ok\b", msg, re.I):
+            st["fechar"] = code
         st["agents"].pop(d.get("agent_id") or "", None)
         if not d.get("agent_id") and st["agents"]:
             st["agents"].pop(sorted(st["agents"], key=lambda k: st["agents"][k].get("t", 0))[0], None)
@@ -803,6 +842,8 @@ def cmd_plano(d, root, argv):
         probs = check_plan(root, argv[0])
         for p in probs:
             print(f"- {p}")
+        for s in suggest_plan(argv[0]):
+            print(f"  sugestão: {s}")
         print("plano ok" if not probs else f"{len(probs)} problema(s)")
         return 1 if probs else 0
     ti = d.get("tool_input") if isinstance(d.get("tool_input"), dict) else {}
@@ -814,9 +855,15 @@ def cmd_plano(d, root, argv):
     if not p:
         return 0
     probs = check_plan(root, os.path.join(root, p))
+    sug = suggest_plan(os.path.join(root, p))
+    ctx = ""
     if probs:
-        emit("PostToolUse", context=f"Checagem do plano {p} ({len(probs)}):\n- " + "\n- ".join(probs[:15])
-             + "\nCorrija antes de executar: task com decisão pendente vira retrabalho na execução.")
+        ctx = (f"Checagem do plano {p} ({len(probs)}):\n- " + "\n- ".join(probs[:15])
+               + "\nCorrija antes de executar: task com decisão pendente vira retrabalho na execução.")
+    if sug:
+        ctx += ("\n" if ctx else f"Plano {p}: ") + "Sugestões (confira, não são erro):\n- " + "\n- ".join(sug[:8])
+    if ctx:
+        emit("PostToolUse", context=ctx)
     return 0
 
 

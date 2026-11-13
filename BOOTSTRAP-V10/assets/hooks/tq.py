@@ -4,6 +4,10 @@
 Uso:
   tq.sh '<comando>'      entra na fila, espera a vez e roda o comando com bash -c
   tq.sh --status         mostra quem roda e quem espera
+  tq.sh --full '<cmd>'   como acima; verde, grava o estado do código (para não rodar de novo)
+  tq.sh --full-ok '<cmd>'  sai 0 se esse comando já passou neste mesmo estado do código
+  tq.sh --fase           fim de fase: roda só as partes de GATE_PARTS que o diff tocou
+                         (sem GATE_PARTS, o GATE_FULL)
 
 Como funciona:
   - Cada processo que quer rodar cria um ticket <tempo_ns>-<pid>.t e segura flock nele.
@@ -152,13 +156,107 @@ def run(d, cmd):
             os.unlink(path)
 
 
+def git_out(*args):
+    try:
+        return subprocess.run(["git", *args], capture_output=True, timeout=30).stdout
+    except Exception:
+        return b""
+
+
+EXCL = [":(exclude).context", ":(exclude)*.md"]  # plano e doc mudam sem mudar o código
+
+
+def changed_files():
+    names = git_out("diff", "--name-only", "-z", "HEAD", "--", ".", *EXCL)
+    names += git_out("ls-files", "-z", "--others", "--exclude-standard", "--", ".", *EXCL)
+    return [n.decode() for n in names.split(b"\0") if n]
+
+
+def code_state():
+    """Hash do código: diff dos rastreados mais conteúdo dos não rastreados."""
+    import hashlib
+    h = hashlib.sha1(git_out("rev-parse", "HEAD"))
+    h.update(git_out("diff", "--no-ext-diff", "HEAD", "--", ".", *EXCL))
+    for n in sorted(git_out("ls-files", "-z", "--others", "--exclude-standard", "--", ".", *EXCL).split(b"\0")):
+        if n and os.path.isfile(n):
+            h.update(n)
+            with open(n, "rb") as fh:
+                h.update(hashlib.sha1(fh.read()).digest())
+    return h.hexdigest()
+
+
+def full_ok_path():
+    p = git_out("rev-parse", "--git-path", "prevec").decode().strip() or ".git/prevec"
+    os.makedirs(p, exist_ok=True)
+    return os.path.join(p, "full-ok.json")
+
+
+def norm(cmd):
+    return " ".join(str(cmd).split())
+
+
+def full_ok(cmd):
+    try:
+        with open(full_ok_path(), encoding="utf-8") as fh:
+            h = json.load(fh)
+    except Exception:
+        return None
+    # Vale se o comando gravado cobriu cada parte do GATE_FULL (rodar só "npm test" não cobre o build).
+    import re
+    parts = [norm(x) for x in re.split(r"&&|;|\|\|", cmd) if norm(x)]
+    if parts and all(x in h.get("cmd", "") for x in parts) and h.get("state") == code_state():
+        return h
+    return None
+
+
+def run_full(d, cmd):
+    rc = run(d, cmd)
+    if rc == 0:
+        with open(full_ok_path(), "w", encoding="utf-8") as fh:
+            json.dump({"cmd": norm(cmd), "state": code_state(), "t": time.time()}, fh)
+    return rc
+
+
+def fase(d):
+    full = os.environ.get("GATE_FULL", "").strip()
+    parts = []
+    for item in os.environ.get("GATE_PARTS", "").split("|"):
+        if "=" in item and not item.strip().startswith("<"):
+            pasta, cmd = item.split("=", 1)
+            parts.append((pasta.strip().rstrip("/") + "/", cmd.strip()))
+    if not parts:
+        if not full or full.startswith("<"):
+            print("[tq] sem GATE_FULL nem GATE_PARTS no gates.conf", file=sys.stderr)
+            return 2
+        return run_full(d, full)
+    files = changed_files()
+    hit = [(p, c) for p, c in parts if any(f.startswith(p) for f in files)]
+    if not hit:
+        print("[tq] fase: nenhuma parte de GATE_PARTS foi tocada; nada a rodar")
+        return 0
+    print("[tq] fase: rodando " + ", ".join(p for p, _ in hit), file=sys.stderr, flush=True)
+    return run(d, " && ".join(f"({c})" for _, c in hit))
+
+
 def main(argv):
     if not argv or argv[0] in ("-h", "--help"):
         print(__doc__)
         return 0
+    if argv[0] == "--full-ok":
+        h = full_ok(" ".join(argv[1:]))
+        if h:
+            print(time.strftime("%H:%M", time.localtime(h.get("t", 0))))
+            return 0
+        return 1
     d = queue_dir()
     if argv[0] == "--status":
         return status(d)
+    if argv[0] == "--fase":
+        return fase(d)
+    if argv[0] == "--full":
+        import shlex
+        rest = argv[1:]
+        return run_full(d, shlex.join(rest) if len(rest) > 1 else (rest[0] if rest else ""))
     import shlex
     return run(d, shlex.join(argv) if len(argv) > 1 else argv[0])
 

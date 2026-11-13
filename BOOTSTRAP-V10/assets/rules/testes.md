@@ -28,7 +28,7 @@ Todo teste precisa de um motivo: um critério de aceite, um risco ou um bug. Sem
 
 ## Qualidade
 - **T6** Refatorar não pode quebrar teste. Se quebrou sem mudar comportamento, o teste testava implementação: reescreva-o pelo comportamento.
-- **T7** Veja o teste falhar antes de passar. Confira que apagar a asserção principal o faz falhar.
+- **T7** Veja o teste falhar antes de passar: rodar antes de implementar basta. A mutação (inverter a condição ou apagar a asserção principal e ver falhar) é obrigatória só quando o E da task pede, em área de risco; fora disso, não faça nem liste como não verificado.
 - **T8** Antes de criar arquivo de teste, procure teste existente que já cobre o caso e estenda-o. Com `tests.lock` ativo (testes primeiro), o teste novo vai em arquivo novo.
 - **T9** Teste instável vai para quarentena com o motivo registrado. Retry silencioso e `sleep` não corrigem.
 

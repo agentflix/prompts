@@ -242,6 +242,25 @@ chk "$(echo '{"session_id":"G1","stop_hook_active":false}' | /bin/bash .claude/h
 J '{"session_id":"G1","hook_event_name":"SubagentStop","agent_id":"g1"}'
 chk "$(echo '{"session_id":"G1","stop_hook_active":false}' | /bin/bash .claude/hooks/gate.sh >/dev/null 2>&1; echo $?)" 2 "gate: subagente voltou, gate roda"
 mv gates.bak .claude/hooks/gates.conf; rm -f novo-gate.txt
+sed -i.bak 's/^### T2 \(.*\)estado: [^ ]*/### T2 \1estado: ⬜/' .context/work/00001-cpf.md; rm -f .context/work/00001-cpf.md.bak
+echo '{"session_id":"S9","tool_name":"Agent","tool_input":{"description":"T2 — outra","subagent_type":"executor","prompt":"x"}}' | PV pre >/dev/null
+J '{"session_id":"S9","hook_event_name":"SubagentStart","agent_id":"b1","agent_type":"executor"}'
+J '{"session_id":"S9","hook_event_name":"SubagentStop","agent_id":"b1","last_assistant_message":"VEREDITO: ok\nPROVA: x"}'
+chk "$(grep -c '### T2 .*estado: ✅' .context/work/00001-cpf.md)" 1 "subagente em background que volta ok fecha a task (SubagentStop)"
+printf '## Fase 1\n### T1 — a · depende: — · estado: ⬜\n**A** `src/a.ts`\n### T2 — b · depende: T1 · estado: ⬜\n**A** `src/m.ts`\n### T3 — c · depende: T1 · estado: ⬜\n**A** `src/x.ts` (novo)\n**C** usa a função de a.ts\n' > sug.md
+chk "$(PV plano sug.md | grep -c 'sugestão: T2 depende de T1')$(PV plano sug.md | grep -c 'sugestão: T3')" 10 "plano: sugere tirar dependência que não divide nem cita arquivo"
+rm -f sug.md; cp .claude/hooks/gates.conf gates.bak
+printf "GATE_FULL='echo suite'\nGATE_PARTS='src=echo PARTE-SRC|outra=echo PARTE-OUTRA'\n" > .claude/hooks/gates.conf
+echo y > src/a.ts
+chk "$(/bin/bash .claude/hooks/tq.sh --fase 2>/dev/null)" "PARTE-SRC" "fase: roda só a parte que o diff tocou"
+/bin/bash .claude/hooks/tq.sh --full 'echo suite' >/dev/null
+chk "$(echo '{"tool_name":"Bash","tool_input":{"command":"echo suite"}}' | /bin/bash .claude/hooks/fila.sh | grep -c '"deny"')" 1 "fila: GATE_FULL verde no mesmo estado não roda de novo"
+echo .context-only > .context/nota.md
+chk "$(echo '{"tool_name":"Bash","tool_input":{"command":"echo suite"}}' | /bin/bash .claude/hooks/fila.sh | grep -c '"deny"')" 1 "fila: mudança só em .context não invalida"
+echo z > src/a.ts
+chk "$(echo '{"tool_name":"Bash","tool_input":{"command":"echo suite"}}' | /bin/bash .claude/hooks/fila.sh | grep -c -e "--full 'echo suite'")" 1 "fila: código mudou, GATE_FULL roda pela fila com --full"
+chk "$(echo '{"tool_name":"Bash","tool_input":{"command":"TQ_FORCE=1 echo suite"}}' | /bin/bash .claude/hooks/fila.sh | grep -c '"deny"')" 0 "fila: TQ_FORCE=1 força"
+mv gates.bak .claude/hooks/gates.conf; rm -f .context/nota.md
 D() { python3 -c 'import json,sys;print(json.dumps({"session_id":"S7","hook_event_name":"UserPromptSubmit","prompt":sys.argv[1]}))' "$1" | PV status | grep -c "Modo técnico"; }
 chk "$(D 'detalhe')$(D 'detalha a fila de testes')$(D 'me explica o técnico disso')" 111 "detalhe: pedido curto ou que começa com a palavra vira modo técnico"
 chk "$(D 'corrige o bug. Um detalhe: o login quebra quando a senha tem espaço no começo e no fim')" 0 "detalhe: palavra no meio de pedido longo não dispara"

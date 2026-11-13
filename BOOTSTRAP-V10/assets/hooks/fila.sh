@@ -82,6 +82,24 @@ for seg in segments(sys.argv[1]):
 ' "$cmd" "${GATE_FULL:-}" "${TQ_MATCH:-}")"
 [ -n "$hit" ] || exit 0
 
+# GATE_FULL que já passou neste mesmo estado do código: nega e diz quando passou.
+# O revisor e o ship usam aquela saída. TQ_FORCE=1 no comando força rodar de novo.
+if [ "$hit" = "GATE_FULL" ]; then
+  case "$cmd" in *TQ_FORCE=1*) ;; *)
+    when="$(cd "$ROOT" && python3 -I "$HOOKS_DIR/tq.py" --full-ok "$GATE_FULL" 2>/dev/null)" && {
+      py -c '
+import json, sys
+msg = ("GATE_FULL já passou às " + sys.argv[1] + " neste mesmo estado do código (nada mudou desde então, "
+       "fora plano e documentação). Use aquele resultado; não rode de novo. "
+       "Se precisa mesmo rodar, prefixe o comando com TQ_FORCE=1.")
+print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny",
+                  "permissionDecisionReason": msg}}, ensure_ascii=False))
+' "$when"
+      exit 0
+    } ;;
+  esac
+fi
+
 # Reescreve o comando para passar pela fila (updatedInput): o agente não perde turno.
 # A reescrita exige permissionDecision "allow"; o comando é o mesmo que o agente pediu.
 # Foreground ganha timeout de 10 minutos (o padrão de 2 mataria a suíte na espera).
@@ -90,7 +108,8 @@ import json, shlex, sys
 d = json.loads(sys.argv[1] or "{}")
 ti = dict(d.get("tool_input") or {})
 tq = sys.argv[2] + "/.claude/hooks/tq.sh"
-ti["command"] = shlex.quote(tq) + " " + shlex.quote(ti.get("command") or "")
+full = " --full" if sys.argv[3] == "GATE_FULL" else ""  # verde grava o estado: não roda de novo igual
+ti["command"] = shlex.quote(tq) + full + " " + shlex.quote(ti.get("command") or "")
 if not ti.get("run_in_background"):
     try:
         cur = int(ti.get("timeout") or 0)

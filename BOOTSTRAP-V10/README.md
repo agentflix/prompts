@@ -12,7 +12,7 @@ Na raiz do projeto:
 Leia e execute BOOTSTRAP-V10/bootstrap-v10.md
 ```
 
-Wizard em caixas de opção (até quatro chamadas). Auditoria depois: `bash BOOTSTRAP-V10/assets/doctor.sh`. Teste do kit: `bash BOOTSTRAP-V10/assets/tests/hooks-test.sh` (95 casos).
+Wizard em caixas de opção (até quatro chamadas). Auditoria depois: `bash BOOTSTRAP-V10/assets/doctor.sh`. Teste do kit: `bash BOOTSTRAP-V10/assets/tests/hooks-test.sh` (102 casos).
 
 ## O fluxo
 
@@ -34,7 +34,7 @@ Um molde só (`skills/plano/references/plano.template.md`). O que faz a execuç�
 - Por task: **A** arquivos exatos, **Ref** vizinho a imitar, **C** comportamento em EARS com o caminho de erro, **E** comando que roda só o teste da task, `depende:`, `[P]` paralelo, `agente:` sugerido, **Cuidado** com a armadilha conhecida.
 - **Pode dar errado** (só grande): pre-mortem curto.
 - Checagem por máquina: o hook `prevec.sh plano` roda ao gravar o plano e acusa arquivo inexistente sem `(novo)`, task sem EARS ou sem comando, dependência circular e `[P]` que divide arquivo. Verificação determinística pega o que um revisor LLM deixa passar em texto fluente.
-- O plano é também o estado: o hook marca 🔄 quando o agente edita um arquivo do A de uma task ou despacha subagente com `T3` na descrição, e ✅ quando o subagente volta `ok` ou o E rodou e o trabalho passou para a próxima. Estado nunca regride. Sem `progress.md`, sem `features.json`.
+- O plano é também o estado: o hook marca 🔄 quando o agente edita um arquivo do A de uma task ou despacha subagente com `T3` na descrição, e ✅ quando o subagente volta `VEREDITO: ok` (inclusive em background, pelo `SubagentStop`) ou o E rodou e o trabalho passou para a próxima. Estado nunca regride. Sem `progress.md`, sem `features.json`.
 
 ## Orquestração por custo
 
@@ -48,7 +48,8 @@ Opus na conversa principal planeja, integra e revisa. Código delegado sai em So
 ## Testes sem travar a máquina
 
 - Por task: só o teste afetado (campo E). Fim de turno: `GATE_FAST` por hook, com `{changed}`.
-- `GATE_FULL`: só no fim da fase e no `ship`, uma vez. O revisor recebe a saída e não roda de novo.
+- Fim de fase: `tq.sh --fase`. Em monorepo, `GATE_PARTS` roda só as partes que o diff tocou; o `GATE_FULL` inteiro roda no fim do plano.
+- `GATE_FULL` uma vez por estado do código: verde, a fila grava o estado; pedir de novo sem mudar código (revisor, ship) é negado pelo hook com a hora em que passou. `TQ_FORCE=1` força.
 - **Fila `tq`**: uma suíte pesada por repositório por vez, valendo entre sessões, subagentes e worktrees. FIFO por ticket com `flock` (python3, macOS e Linux, sem daemon). Dono morto (crash, `kill -9`) não prende a fila. Quem espera não gasta token: o processo dorme e imprime "posição 2 de 3". O hook `fila.sh` reescreve o `GATE_FULL` e os comandos de `TQ_MATCH` para passar pela fila (`updatedInput`): o agente pede o comando normal e ele espera a vez sozinho, sem turno extra. Teste de um arquivo passa direto. Validado numa sessão real do Claude Code: com a fila ocupada, a suíte do agente esperou (`posição 2 de 2`) e rodou em seguida. Suíte longa roda em background e a notificação chega no fim.
 - Por que não cron a cada 30 s: cada consulta seria um turno do modelo. Na fila, a espera é do processo, e a ordem é justa (`flock` sozinho não garante ordem).
 

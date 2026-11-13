@@ -25,7 +25,7 @@ A pasta diz a fase: `.context/planos/` em planejamento, `.context/work/` em exec
 
 Cada task:
 
-- Título `### T<n> — <verbo + o quê> · [P] · depende: T<m> · agente: <executor|mecanico|direto> · estado: ⬜`. `[P]` só quando não divide arquivo com outra `[P]` da fase nem depende dela.
+- Título `### T<n> — <verbo + o quê> · [P] · depende: T<m> · agente: <executor|mecanico|direto> · estado: ⬜`. `[P]` só quando não divide arquivo com outra `[P]` da fase nem depende dela. `depende:` só quando a task usa algo que a outra cria (arquivo, função, tabela, rota); estar na mesma fase não é dependência. A fase marca onde roda o gate. O checador sugere tirar dependência que não divide nem cita arquivo.
 - **A**: arquivos exatos, `(novo)` ou `(editar: o que muda)`. Teste da task também entra.
 - **Ref**: o vizinho a imitar, com linhas.
 - **C**: cláusulas EARS (`QUANDO … O SISTEMA DEVE …`, `SE <erro>, ENTÃO …`), incluindo o caminho de erro. Cláusula que você não sabe escrever é comportamento não definido: volte ao passo 2.

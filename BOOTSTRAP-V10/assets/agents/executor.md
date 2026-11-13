@@ -23,6 +23,7 @@ Você executa uma task que o orquestrador já decidiu. O pedido traz a task no f
 Telegráfica, até 300 tokens, sem preâmbulo. Exatos sempre: caminhos, números, nomes, mensagens de erro e as palavras "não", "nunca", "só".
 
 ```
+TASK: <código da task do pedido, ex.: T3; sem task, apague a linha>
 VEREDITO: ok | parcial | bloqueado
 ACHADOS: um por linha, com path:line
 EVIDÊNCIA: trecho ou saída curta que prova
