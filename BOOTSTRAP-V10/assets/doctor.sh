@@ -175,12 +175,19 @@ fi
 
 sec "Formato do .context"
 if [ -d .context ]; then
-  extra=$(find .context -mindepth 1 -maxdepth 1 ! -name decisions ! -name planos ! -name _arquivo ! -name '.*' 2>/dev/null)
-  [ -z "$extra" ] && ok ".context/ no formato V10 (decisions, planos, _arquivo)" || { warn "Fora do formato V10 em .context/ (migre ou arquive, seção 2 do bootstrap):"; echo "$extra" | head -8 | sed 's/^/        /'; }
-  for pl in .context/planos/*.md; do
+  extra=$(find .context -mindepth 1 -maxdepth 1 ! -name decisions ! -name planos ! -name work ! -name done ! -name _arquivo ! -name '.*' 2>/dev/null)
+  [ -z "$extra" ] && ok ".context/ no formato V10 (decisions, planos, work, done, _arquivo)" || { warn "Fora do formato V10 em .context/ (migre ou arquive, seção 2 do bootstrap):"; echo "$extra" | head -8 | sed 's/^/        /'; }
+  for d in planos work done; do
+    for x in .context/$d/*; do
+      [ -e "$x" ] || continue
+      case "$(basename "$x")" in _*|.gitkeep) continue ;; esac
+      [ -d "$x" ] && { warn "$x é pasta: plano do V10 é um arquivo só, $d/NNNNN-<feature>.md"; continue; }
+      basename "$x" | grep -qE '^[0-9]{5}-.+\.md$' || warn "$x sem número: renomeie para NNNNN-<feature>.md"
+    done
+  done
+  for pl in .context/work/*.md; do
     [ -f "$pl" ] || continue
     case "$(basename "$pl")" in _*) continue ;; esac
-    grep -qE '^status:[[:space:]]*em-execu' "$pl" || continue
     if [ -x .claude/hooks/prevec.sh ] && [ "$PY" = 1 ]; then
       .claude/hooks/prevec.sh plano "$pl" >/dev/null 2>&1 && ok "$pl passa na checagem" || warn "$pl em execução com problemas: .claude/hooks/prevec.sh plano $pl"
     fi
@@ -193,7 +200,7 @@ for f in .context/specs .claude/skills/spec; do
 done
 
 sec "Restos do V8"
-for f in .context/PREVEC.md .context/formats .context/arch .context/work .claude/agents/PLANNER.md .claude/agents/BUILDER.md .claude/agents/REVIEWER.md .claude/skills/plan .claude/skills/build .claude/skills/gates .claude/skills/design .codex/agents/planner.toml .codex/agents/builder.toml .codex/agents/reviewer.toml; do
+for f in .context/PREVEC.md .context/formats .context/arch .context/work/done .context/specs/features.json .claude/agents/PLANNER.md .claude/agents/BUILDER.md .claude/agents/REVIEWER.md .claude/skills/plan .claude/skills/build .claude/skills/gates .claude/skills/design .codex/agents/planner.toml .codex/agents/builder.toml .codex/agents/reviewer.toml; do
   [ -e "$f" ] && warn "$f ainda existe (V8). Veja a migração no bootstrap-v10.md"
 done
 for f in .claude/skills/arch-*; do [ -e "$f" ] && warn "$f ainda existe (V8): virou .claude/rules/"; done

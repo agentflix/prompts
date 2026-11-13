@@ -14,7 +14,7 @@ Antes de agir, classifique o pedido. Diga o tamanho em uma linha só quando não
 
 - **Pontual** (1 a 3 arquivos, sem decisão de design, sem área de risco): faça direto, sem plano. Rode o teste afetado e entregue.
 - **Médio** (vários arquivos, cabe nesta sessão, nada a decidir com o usuário, você mesmo executa): sem arquivo de plano. Liste os passos em uma linha cada, execute, teste afetado por passo, `GATE_FULL` no fim.
-- **Grande** (decisão a aprovar, delegação a subagentes, várias sessões, módulo novo ou área de risco): skill `plano` (arquivo `.context/planos/NNNNN-<feature>.md`, número sequencial), depois `executar`.
+- **Grande** (decisão a aprovar, delegação a subagentes, várias sessões, módulo novo ou área de risco): skill `plano` (`.context/planos/NNNNN-<feature>.md`; executando vai para `.context/work/`, entregue para `.context/done/`), depois `executar`.
 
 Com "spec" ou "testes primeiro" no pedido, o plano escreve os testes antes do código e os trava (skill `plano`).
 

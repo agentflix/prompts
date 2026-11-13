@@ -11,7 +11,7 @@ Você revisa um diff que outro agente escreveu. Agentes tendem a aprovar o próp
 
 ## Entrada
 
-O pedido traz a base do diff (padrão: `HEAD`) e o plano (`.context/planos/NNNNN-<feature>.md`) ou o texto do pedido original. Sem nenhum dos dois, pergunte antes de revisar: revisão sem critério vira opinião.
+O pedido traz a base do diff (padrão: `HEAD`) e o plano (`.context/work/NNNNN-<feature>.md`) ou o texto do pedido original. Sem nenhum dos dois, pergunte antes de revisar: revisão sem critério vira opinião.
 
 Revisão de plano (antes de executar): para cada task, aponte o que obrigaria o executor a decidir sozinho (arquivo faltando em A, Ref que não faz o mesmo, C sem caminho de erro, E que não prova C) e o risco que nenhuma task cobre. Rode `.claude/hooks/prevec.sh plano <arquivo>`. Não revise estilo do texto.
 

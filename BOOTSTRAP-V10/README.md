@@ -22,7 +22,7 @@ O agente classifica o pedido antes de agir:
 |---|---|
 | **Pontual** (1 a 3 arquivos, sem decisão) | Faz direto. Sem plano, sem arquivo. Teste afetado e entrega |
 | **Médio** (já especificado, cabe na sessão, você mesmo executa) | Passos em uma linha cada, teste afetado por passo, `GATE_FULL` no fim. Sem arquivo |
-| **Grande** (decisão a aprovar, delegação, várias sessões, módulo novo, área de risco) | Skill `plano` (arquivo `.context/planos/00001-<feature>.md`, numerado em sequência), `executar`, `ship` |
+| **Grande** (decisão a aprovar, delegação, várias sessões, módulo novo, área de risco) | Skill `plano` (`.context/planos/00001-<feature>.md`), `executar` (move para `work/`), `ship` (move para `done/`) |
 
 "Testes primeiro" ou "spec" no pedido: a primeira fase do plano escreve os testes e os trava.
 
@@ -97,7 +97,9 @@ CLAUDE.md                      @AGENTS.md + instruções de compactação
   skills/                      plano · executar · ship · delegar · postura · retomar · retro · code-review-confiavel
   agents/                      explorador e mecanico (Haiku) · executor (Sonnet) · revisor (Opus)
 .context/
-  planos/NNNNN-<feature>.md    plano e estado, numerado em sequência; entregues/ depois do ship
+  planos/NNNNN-<feature>.md    em planejamento (número sequencial, nunca muda)
+  work/NNNNN-<feature>.md      em execução: plano e estado
+  done/NNNNN-<feature>.md      entregue, depois do ship
   decisions/                   só decisão de arquitetura
 .codex/ · .opencode/           os mesmos agentes; no Codex, os mesmos hooks
 ```

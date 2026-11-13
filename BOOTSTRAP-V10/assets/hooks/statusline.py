@@ -69,19 +69,21 @@ def task_max():
 
 def plan_task(root, prefer=None):
     """Sem tarefa nativa: a task atual do plano em execução (a que o hook inferiu, a 🔄, ou a próxima ⬜)."""
-    d = os.path.join(root, ".context", "planos")
-    try:
-        files = sorted((os.path.join(d, f) for f in os.listdir(d) if f.endswith(".md") and not f.startswith("_")),
-                       key=os.path.getmtime, reverse=True)
-    except OSError:
-        return None
+    files = []
+    for sub in ("work", "planos"):
+        d = os.path.join(root, ".context", sub)
+        try:
+            files += [os.path.join(d, f) for f in os.listdir(d) if f.endswith(".md") and not f.startswith("_")]
+        except OSError:
+            pass
+    files.sort(key=os.path.getmtime, reverse=True)
     for f in files[:10]:
         try:
             with open(f, encoding="utf-8") as fh:
                 text = fh.read(200_000)
         except OSError:
             continue
-        if not re.search(r"^status:\s*(em-execucao|em-execução)", text[:600], re.M):
+        if os.sep + "work" + os.sep not in f and not re.search(r"^status:\s*(em-execucao|em-execução)", text[:600], re.M):
             continue
         heads = re.findall(r"^###\s+(T[\d.]+)\s*[—–-]\s*([^·\n]*)(.*)$", text, re.M)
         if not heads:

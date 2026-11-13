@@ -74,9 +74,11 @@ Vale para qualquer `.context/` ou documentação de IA que já exista: V8, V7.1,
    | Regra verificável (faça ou não faça) | `.claude/rules/<área>.md`, com `paths:`. Regra escrita à mão mantém a redação, exceto CAPS: troque a ênfase pelo motivo. Área que o wizard não ativou: crie o arquivo dessa área só com as regras migradas e avise o usuário |
    | Comando de build, teste ou lint | `.claude/hooks/gates.conf` |
    | Decisão com motivo (ADR) | `.context/decisions/NNNN-slug.md`, em sequência na ordem cronológica |
-   | Plano ou feature em andamento | `.context/planos/NNNNN-<feature>.md` no formato da skill `plano` (numere em sequência a partir de `00001`, na ordem de início), com `status: em-execucao`: o que está feito vira task `✅`, o que falta vira task `⬜` com A, C e E. Rode `prevec.sh plano` nele |
+   | Plano ainda não iniciado | `.context/planos/NNNNN-<feature>.md`, `status: rascunho` |
+   | Plano ou feature em andamento | `.context/work/NNNNN-<feature>.md` (um arquivo só) no formato da skill `plano`, numerado em sequência a partir de `00001` na ordem de início, com `status: em-execucao`: o que está feito vira task `✅`, o que falta vira task `⬜` com A, C e E. Rode `prevec.sh plano` nele |
    | Fato não óbvio (armadilha, convenção fora do padrão) | Seção "Não óbvio" do `AGENTS.md` |
-   | Visão geral, árvore de pastas, descrição da stack, metodologia, formato de resposta, plano concluído, changelog | Arquivo morto |
+   | Plano entregue que o usuário quer manter | `.context/done/NNNNN-<feature>.md`, como está, só renomeado com o número |
+   | Visão geral, árvore de pastas, descrição da stack, metodologia, formato de resposta, changelog | Arquivo morto |
 
 3. **Mostre a tabela preenchida** (arquivo, conteúdo, destino) e pergunte com a ferramenta de pergunta, por grupo. Para o arquivo morto:
    - mover para `.context/_arquivo/` (recomendado: é reversível, e nenhum arquivo do V10 aponta para essa pasta);
@@ -88,7 +90,7 @@ Mapa direto do V9:
 
 | V9 | V10 |
 |---|---|
-| `.context/specs/<f>/SPEC.md` em andamento | `.context/planos/NNNNN-<f>.md`: critérios viram **Pronto quando**, a seção Plano vira tasks T.A.C.E |
+| `.context/specs/<f>/` em andamento (`SPEC.md`, `features.json`, `work.md`) | Um arquivo `.context/work/NNNNN-<f>.md`, e a pasta sai: critérios viram **Pronto quando**, a seção Plano vira tasks T.A.C.E |
 | `features.json` · `progress.md` | Saem. O estado mora no plano (marcado por hook a partir das tarefas nativas) |
 | `.claude/skills/spec` | Sai. A skill `plano` cobre, com "testes primeiro" |
 | `.claude/hooks/*` | Substitua pelos do V10 e mescle o `gates.conf`: as variáveis novas (`TQ_*`, `ESCOPO`, `RITMO_*`, `STATUS_TASK_MAX`) entram com o padrão; as antigas mantêm o valor |
@@ -101,7 +103,7 @@ Mapa direto do V8:
 | `.context/arch/rules.md` | Divida por área em `.claude/rules/{codigo,testes,api,dados,ui}.md`, com `paths:`. Regra escrita à mão vai junto e mantém a redação, exceto CAPS |
 | `.context/arch/gates.md` | Os comandos vão para `.claude/hooks/gates.conf` |
 | `.context/arch/decisions/` | `.context/decisions/` |
-| `.context/work/<feature>.md` em andamento | `.context/planos/NNNNN-<feature>.md`. As tasks T.A.C.E do V8 já estão quase no formato: ajuste o título (`### T1 — … · depende: … · estado: ⬜`) e troque `WHEN/SHALL` por `QUANDO/DEVE` só se quiser; o checador aceita os dois |
+| `.context/work/<feature>.md` em andamento | Fica em `.context/work/`, renomeado para `NNNNN-<feature>.md`. As tasks T.A.C.E do V8 já estão quase no formato: ajuste o título (`### T1 — … · depende: … · estado: ⬜`) e troque `WHEN/SHALL` por `QUANDO/DEVE` só se quiser; o checador aceita os dois |
 | `overview.md` · `modules.yaml` · `flows.md` | Fato não óbvio vai para "Não óbvio" do `AGENTS.md`. Restrição de import vira regra de lint se o usuário quiser. O resto sai |
 | `.context/PREVEC.md` · `.context/formats/` | Saem. A metodologia fica neste bootstrap, não no projeto |
 | `.claude/agents/{PLANNER,BUILDER,REVIEWER}.md` · `.codex/agents/*` | Saem. O revisor substitui o REVIEWER |
@@ -109,7 +111,7 @@ Mapa direto do V8:
 | `.claude/skills/{plan,build,ship,gates,arch-*,design}` | Saem. `ship` é substituída pela nova. `arch-*` e `design` viraram `.claude/rules/` |
 | `.codex/skills` (symlink) | Sai. O Codex lê `.agents/skills` |
 | `opencode.json` com `agent` | Corrija para `agents`, ou remova se só apontava para os agents do V8 |
-| `.context/work/` de features já entregues | Arquivo morto: o commit e o PR contam a história |
+| `.context/work/done/` e features já entregues | `.context/done/` com número, ou arquivo morto (pergunte): o commit e o PR contam a história |
 
 Antes de apagar qualquer arquivo, mostre a lista completa e espere o usuário confirmar. Arquivo com conteúdo escrito à mão que não cabe em nenhum destino: pergunte o que fazer.
 
@@ -129,7 +131,7 @@ Antes de apagar qualquer arquivo, mostre a lista completa e espere o usuário co
 | `skills/retomar` · `skills/retro` · `skills/code-review-confiavel` | `.claude/skills/` | Conforme o wizard |
 | `agents/{explorador,mecanico,executor,revisor}.md` | `.claude/agents/` | Conforme o wizard, com qualquer ferramenta: é a especificação que os agentes do Codex e do OpenCode leem. Sem revisor, o `ship` usa `/code-review`. Ajuste a seção Orquestração do `AGENTS.md` e a tabela da skill `delegar` aos agentes instalados |
 | `skills/delegar` | `.claude/skills/delegar` | Sempre que houver ao menos um subagente instalado |
-| `context/decision.template.md` | `.context/decisions/_TEMPLATE.md` | Copie. Crie também `.context/planos/` vazio, com `.gitkeep` |
+| `context/decision.template.md` | `.context/decisions/_TEMPLATE.md` | Copie. Crie também `.context/planos/`, `.context/work/` e `.context/done/` vazias, com `.gitkeep` |
 | `codex/config.toml` · `codex/hooks.json` · `agents/codex/*.toml` | `.codex/config.toml` · `.codex/hooks.json` · `.codex/agents/` | Só com Codex, e só os agentes escolhidos. Preencha o `model` de cada agente com o modelo rápido e o de uso geral que a doc atual do Codex recomenda para subagentes; sem certeza, deixe sem a linha, e o agente herda o modelo da sessão. Skills: veja "Skills que o projeto já tem" abaixo da tabela. Saída `normal`: apague `model_verbosity`. Estilo `dev-claro`: cole em `developer_instructions` o corpo de `.claude/output-styles/dev-claro.md`, sem o frontmatter; outro estilo: apague o bloco |
 | `agents/opencode/*.md` | `.opencode/agents/` | Só com OpenCode, e só os agentes escolhidos. Confira na doc atual se os IDs `anthropic/claude-*-5-5#effort` ainda valem. O OpenCode V2 já lê `AGENTS.md` e `.claude/skills` sozinho. Não crie `opencode.json` sem necessidade |
 | `opencode/opencode.json` | `opencode.json` | Só com OpenCode e estilo `dev-claro`: aponta `instructions` para `.claude/output-styles/dev-claro.md`. Se já existe, acrescente o caminho à lista `instructions` |
@@ -161,7 +163,7 @@ Skills que o projeto já tem:
 !.claude/skills/<cada skill do V10>/
 ```
 
-Crie as pastas antes de copiar: `mkdir -p .claude/hooks .claude/rules .claude/skills .claude/agents .claude/output-styles .context/decisions .context/planos`, mais `.codex/agents` e `.opencode/agents` conforme as ferramentas.
+Crie as pastas antes de copiar: `mkdir -p .claude/hooks .claude/rules .claude/skills .claude/agents .claude/output-styles .context/decisions .context/planos .context/work .context/done`, mais `.codex/agents` e `.opencode/agents` conforme as ferramentas.
 
 Lista de tarefas nativa, para mostrar o andamento de trabalho longo:
 - **Claude Code:** já vem pronta, a lista de tarefas nativa mais o hook de status e a statusline do V10.
@@ -177,7 +179,7 @@ Alcance dos hooks por ferramenta. Diga isso no relatório, sem prometer mais:
 - No Codex, guard e escopo valem só para `apply_patch`; edição feita por Bash (`sed -i`) passa. A fila precisa do nome da tool de shell no `matcher` do `.codex/hooks.json`: confira na doc atual e troque o placeholder; sem certeza, apague esse bloco e deixe a fila só no `AGENTS.md`. Status e ritmo são só do Claude Code.
 - O OpenCode fica sem hooks. Lá o gate, a fila e as proteções dependem do `AGENTS.md`.
 
-Adicione ao `.gitignore`: `.claude/hooks/tests.lock`, `.claude/hooks/gate.pause`, `.claude/settings.local.json` e `.context/planos/entregues/` se o time não quer versionar plano entregue. São estado da sua máquina, não do projeto.
+Adicione ao `.gitignore`: `.claude/hooks/tests.lock`, `.claude/hooks/gate.pause`, `.claude/settings.local.json` e `.context/done/` se o time não quer versionar plano entregue. São estado da sua máquina, não do projeto.
 
 `.claude/` é a pasta canônica de hooks, regras e skills, mesmo sem o Claude Code. Sem ele, não gere `CLAUDE.md`, `settings.json`, statusline nem output style.
 

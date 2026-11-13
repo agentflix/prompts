@@ -48,7 +48,7 @@ Se a política/ferramenta exigir autorização explícita para subagents e o ped
 
 ## 6. Rastreabilidade
 
-**Escopo:** vínculo entre diff, pedido ou plano (`.context/planos/`), **Pronto quando**, cláusulas C e evidências.
+**Escopo:** vínculo entre diff, pedido ou plano (`.context/work/`), **Pronto quando**, cláusulas C e evidências.
 
 **Prompt base:**
 

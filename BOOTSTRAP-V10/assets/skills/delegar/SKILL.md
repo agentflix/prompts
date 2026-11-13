@@ -35,7 +35,7 @@ Haiku não revisa nem decide design. No Codex e no OpenCode os nomes são os mes
 O que você já sabe vai no pedido. Cada fato que o subagente precisa descobrir sozinho custa leituras e abre espaço para ele errar.
 
 ```
-Task: <T3 — título> do plano <.context/planos/00003-x.md>
+Task: <T3 — título> do plano <.context/work/00003-x.md>
 A: <arquivos exatos, novo/editar> · Ref: <arquivo:linhas a imitar>
 C: <cláusulas EARS copiadas do plano>
 E: <comando> → <resultado esperado>

@@ -15,7 +15,7 @@
            para a skill retro achar trabalho manual repetido que vale virar script ou skill.
   rotulo   PreToolUse no tool Agent. Põe o modelo na frente da descrição do subagente
            ("Sonnet · Escrevendo testes"), para a lista de agentes mostrar quem roda onde.
-  plano    PostToolUse em Write/Edit de .context/planos/*.md, ou na linha de comando
+  plano    PostToolUse em Write/Edit de .context/planos/*.md ou .context/work/*.md, ou na linha de comando
            (prevec.sh plano <arquivo>). Checa o plano de forma determinística.
 
 Regra geral: hook de estado nunca bloqueia nem quebra o turno. Erro inesperado sai 0 calado.
@@ -159,23 +159,27 @@ def active_plan(root, code=None):
     return None
 
 
-def active_plans(root):
-    d = os.path.join(root, ".context", "planos")
+def plan_files(root, sub):
+    d = os.path.join(root, ".context", sub)
     try:
-        files = [os.path.join(d, f) for f in os.listdir(d) if f.endswith(".md") and not f.startswith("_")]
+        return [os.path.join(d, f) for f in os.listdir(d) if f.endswith(".md") and not f.startswith("_")]
     except OSError:
         return []
-    files.sort(key=lambda f: os.path.getmtime(f), reverse=True)
-    out = []
-    for f in files:
+
+
+def active_plans(root):
+    """Planos em execução: todo plano em .context/work/ e, por compatibilidade, os de
+    .context/planos/ com status em-execucao. Mais recente primeiro."""
+    files = plan_files(root, "work")
+    for f in plan_files(root, "planos"):
         try:
             with open(f, encoding="utf-8") as fh:
                 head = fh.read(600)
         except OSError:
             continue
         if re.search(r"^status:\s*(em-execucao|em-execução)", head, re.M):
-            out.append(f)
-    return out
+            files.append(f)
+    return sorted(files, key=os.path.getmtime, reverse=True)
 
 
 def parse_plan(text):
@@ -273,7 +277,8 @@ def check_plan(root, path):
     if not re.search(r"^##\s+Pronto quando", text, re.M):
         probs.append("falta a seção `## Pronto quando` (critério da feature, não a soma das tasks)")
     codes = {t["code"] for t in tasks}
-    executing = fm.get("status", "").startswith("em-execu")  # arquivo (novo) já criado não é erro
+    # arquivo (novo) já criado não é erro durante a execução
+    executing = fm.get("status", "").startswith("em-execu") or os.sep + "work" + os.sep in os.path.abspath(path)
     seen = set()
     for t in tasks:
         c = t["code"]
@@ -799,7 +804,7 @@ def cmd_plano(d, root, argv):
     cmd = ti.get("command") if isinstance(ti.get("command"), str) else ""
     cands += re.findall(r"^\*\*\* (?:Add|Update) File: (.+)$", cmd, re.M)  # apply_patch do Codex
     p = next((q for q in (rel(root, c.strip(), d.get("cwd")) for c in cands)
-              if re.match(r"^\.context/planos/[^/_][^/]*\.md$", q)), None)
+              if re.match(r"^\.context/(planos|work)/[^/_][^/]*\.md$", q)), None)
     if not p:
         return 0
     probs = check_plan(root, os.path.join(root, p))

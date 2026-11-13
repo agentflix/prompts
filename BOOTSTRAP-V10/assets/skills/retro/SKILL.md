@@ -10,7 +10,7 @@ Sugestão vem de dado medido, não de opinião. Junte primeiro:
 
 - `"$(git rev-parse --git-path prevec)/gate-log.tsv"`: data, segundos, código de saída e resultado (`verde`, `vermelho`, `timeout`, `liberado`) de cada gate.
 - `"$(git rev-parse --git-path prevec)/cmds.tsv"`: data, sessão, agente e assinatura de cada comando de shell (caminhos, números e textos trocados por P, N, S). Conte as assinaturas repetidas.
-- O plano da rodada (`.context/planos/`), a fila de testes (`.claude/hooks/tq.sh --status`) e `git log --since="<início da rodada>" --stat`.
+- O plano da rodada (`.context/work/` ou `.context/done/`), a fila de testes (`.claude/hooks/tq.sh --status`) e `git log --since="<início da rodada>" --stat`.
 - Se o usuário colar o `/usage` ou o `/context`, use também: taxa de cache e o que ocupa o contexto.
 
 Procure estes sinais e proponha a correção correspondente:

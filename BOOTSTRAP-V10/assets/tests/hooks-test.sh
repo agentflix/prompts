@@ -229,6 +229,11 @@ mv .context/planos /tmp/planos.$$
 echo '{"session_id":"S6","tool_name":"Bash","tool_input":{"command":"bash scripts/deploy.sh --x"}}' | PV pre
 chk "$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["acao"])' "$(git rev-parse --git-path prevec)/status/S6.json")" "rodando bash deploy.sh" "pre: sem pasta de planos grava a ação com o nome do script"
 mv /tmp/planos.$$ .context/planos
+mkdir -p .context/work; sed 's/^status: em-execucao/status: rascunho/' .context/planos/cpf.md > .context/work/00001-cpf.md; rm .context/planos/cpf.md
+sed -i.bak 's/estado: 🔄/estado: ⬜/' .context/work/00001-cpf.md; rm -f .context/work/00001-cpf.md.bak
+echo '{"session_id":"S8","tool_name":"Edit","tool_input":{"file_path":"src/nao.ts"}}' | PV pre >/dev/null
+chk "$(grep -c '### T2 .*estado: 🔄' .context/work/00001-cpf.md)" 1 "work: plano em .context/work/ é o ativo, sem depender do status"
+chk "$(echo '{"tool_name":"Write","tool_input":{"file_path":".context/work/00001-cpf.md"}}' | PV plano | grep -c 'já existe')" 0 "work: checador trata como em execução"
 D() { python3 -c 'import json,sys;print(json.dumps({"session_id":"S7","hook_event_name":"UserPromptSubmit","prompt":sys.argv[1]}))' "$1" | PV status | grep -c "Modo técnico"; }
 chk "$(D 'detalhe')$(D 'detalha a fila de testes')$(D 'me explica o técnico disso')" 111 "detalhe: pedido curto ou que começa com a palavra vira modo técnico"
 chk "$(D 'corrige o bug. Um detalhe: o login quebra quando a senha tem espaço no começo e no fim')" 0 "detalhe: palavra no meio de pedido longo não dispara"

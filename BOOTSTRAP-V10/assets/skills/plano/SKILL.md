@@ -19,7 +19,9 @@ Só o que o código não responde e muda o plano. Uma rodada, com a ferramenta d
 
 ## 3. Escrever
 
-Arquivo `.context/planos/NNNNN-<feature>.md` a partir de `references/plano.template.md`. `NNNNN` é o número sequencial com 5 dígitos: o maior número em `.context/planos/` e `.context/planos/entregues/` mais 1 (o primeiro é `00001`). O número nunca muda, nem ao entregar. Seção vazia sai. Sempre: Objetivo, Mapa, tasks, Pronto quando. Decidido e Fora só se houver o que dizer. Várias sessões, módulo novo ou área de risco: **Pode dar errado** (pre-mortem: "a entrega falhou; por quê?") e fases, cada uma entregando algo que passa no `GATE_FULL` sozinha.
+Arquivo `.context/planos/NNNNN-<feature>.md` a partir de `references/plano.template.md`. `NNNNN` é o número sequencial com 5 dígitos: o maior número em `.context/planos/`, `.context/work/` e `.context/done/` mais 1 (o primeiro é `00001`). O número nunca muda.
+
+A pasta diz a fase: `.context/planos/` em planejamento, `.context/work/` em execução, `.context/done/` entregue. O arquivo só muda de pasta, com o mesmo nome. Seção vazia sai. Sempre: Objetivo, Mapa, tasks, Pronto quando. Decidido e Fora só se houver o que dizer. Várias sessões, módulo novo ou área de risco: **Pode dar errado** (pre-mortem: "a entrega falhou; por quê?") e fases, cada uma entregando algo que passa no `GATE_FULL` sozinha.
 
 Cada task:
 
@@ -34,13 +36,13 @@ Tamanho de task: o que um executor fecha em uma rodada, com 1 a 5 arquivos. Maio
 
 ## 4. Checar
 
-O hook `prevec.sh plano` roda sozinho ao gravar o arquivo e devolve os problemas (arquivo inexistente sem `(novo)`, task sem EARS ou sem comando, dependência circular, `[P]` dividindo arquivo). Fora do Claude Code, rode `.claude/hooks/prevec.sh plano .context/planos/NNNNN-<feature>.md`. Corrija até o hook parar de listar problemas (na linha de comando, até sair "plano ok").
+O hook `prevec.sh plano` roda sozinho ao gravar o arquivo e devolve os problemas (arquivo inexistente sem `(novo)`, task sem EARS ou sem comando, dependência circular, `[P]` dividindo arquivo). Fora do Claude Code, rode `.claude/hooks/prevec.sh plano <arquivo do plano>`. Corrija até o hook parar de listar problemas (na linha de comando, até sair "plano ok").
 
 Depois, releia como executor: alguma task obriga a escolher arquivo, padrão ou comportamento? Se sim, a decisão é sua, agora.
 
 ## 5. Aprovar e seguir
 
-Mostre o plano em até 15 linhas (tasks com agente e `[P]`, decisões assumidas, riscos). Pergunte numa caixa ("executar" recomendado, "ajustar", "só salvar") só quando há decisão "(assumido)", área de risco ou tamanho grande; senão, siga. Para executar, ponha `status: em-execucao` e siga com a skill `executar` na mesma resposta. Se o usuário já disse "executa direto", não pergunte.
+Mostre o plano em até 15 linhas (tasks com agente e `[P]`, decisões assumidas, riscos). Pergunte numa caixa ("executar" recomendado, "ajustar", "só salvar") só quando há decisão "(assumido)", área de risco ou tamanho grande; senão, siga. Para executar, mova o arquivo para `.context/work/` (`git mv` se já versionado), ponha `status: em-execucao` e siga com a skill `executar` na mesma resposta. Se o usuário já disse "executa direto", não pergunte.
 
 Grande ou área de risco: ofereça revisão do plano pelo `revisor` antes de executar ("revise este plano: alguma task tem decisão pendente, arquivo errado ou prova fraca?").
 
