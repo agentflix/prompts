@@ -12,7 +12,7 @@ Na raiz do projeto:
 Leia e execute BOOTSTRAP-V10/bootstrap-v10.md
 ```
 
-Wizard em caixas de opção (até quatro chamadas). Auditoria depois: `bash BOOTSTRAP-V10/assets/doctor.sh`. Teste do kit: `bash BOOTSTRAP-V10/assets/tests/hooks-test.sh` (84 casos).
+Wizard em caixas de opção (até quatro chamadas). Auditoria depois: `bash BOOTSTRAP-V10/assets/doctor.sh`. Teste do kit: `bash BOOTSTRAP-V10/assets/tests/hooks-test.sh` (89 casos).
 
 ## O fluxo
 
@@ -64,6 +64,12 @@ reelr/api  |  main*5  |  Opus  |  ████░░░░░░ 35% (348k/1M)  
 - Achado na simulação: com os modelos 5.5, o Claude Code não expõe `TaskCreate`/`TodoWrite`. Por isso o V10 não depende da lista nativa; usa quando existe.
 - Cada linha cabe em `$COLUMNS`; o texto da tarefa tem teto em `STATUS_TASK_MAX` (40). Faltou espaço, saem os itens do fim da linha antes de a tarefa ficar ilegível.
 - `refreshInterval: 5` para fila e subagente aparecerem sem esperar evento.
+
+## Estilo de resposta
+
+`dev-claro` (recomendado no wizard): primeira linha é o resultado em linguagem simples; o importante (risco, algo quebrado, decisão sua) vem logo depois; o que mudou pelo comportamento; o técnico curto no fim (`path:line` e prova, sem código). Pedido que começa com "detalhe" (ou curto com a palavra) recebe, por hook, o aviso de modo técnico só naquela resposta.
+
+Fonte única em `.claude/output-styles/dev-claro.md`, sem passar pelo `AGENTS.md` (que as três ferramentas leem e duplicaria tokens): Claude Code por `outputStyle` com `keep-coding-instructions: true`, OpenCode por `instructions` no `opencode.json`, Codex por `developer_instructions`. É regra de formato, não persona: persona não melhora resultado; formato explícito é verificável.
 
 ## Melhoria do próprio processo
 

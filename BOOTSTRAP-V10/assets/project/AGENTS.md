@@ -51,5 +51,5 @@ Mudança em <migrations, contrato público da API, autenticação, pagamento> pe
 
 ## Entrega
 
-- Termine com o que mudou, a evidência (comando e saída relevante) e o risco que sobrou. Seja conciso.
+- Termine com o que mudou, a evidência (comando e saída relevante) e o risco que sobrou. Seja conciso. <Com estilo dev-claro: apague esta linha; o formato vem do estilo.>
 - Conventional Commits em <pt-BR>. Push e PR só com pedido explícito.

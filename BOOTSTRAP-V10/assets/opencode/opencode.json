@@ -1,0 +1,4 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [".claude/output-styles/dev-claro.md"]
+}
