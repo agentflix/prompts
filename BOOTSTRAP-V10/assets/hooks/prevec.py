@@ -164,7 +164,7 @@ def active_plans(root):
     try:
         files = [os.path.join(d, f) for f in os.listdir(d) if f.endswith(".md") and not f.startswith("_")]
     except OSError:
-        return None
+        return []
     files.sort(key=lambda f: os.path.getmtime(f), reverse=True)
     out = []
     for f in files:
@@ -453,8 +453,14 @@ def describe(tool, ti, root, cwd):
             return "testando"
         if cmd.startswith("git commit"):
             return "commitando"
-        word = cmd.split(" ")[0] if cmd else ""
-        return f"rodando {os.path.basename(word)}" if word else None
+        parts = cmd.split(" ")
+        word = parts[0] if parts else ""
+        if word in ("bash", "sh", "zsh", "python3", "python", "node", "npx", "pnpm", "npm", "yarn", "php", "uv", "make") and len(parts) > 1:
+            nxt = next((p for p in parts[1:] if not p.startswith("-")), "")
+            word = f"{os.path.basename(word)} {os.path.basename(nxt)}".strip()
+        else:
+            word = os.path.basename(word)
+        return f"rodando {word[:30]}" if word else None
     if tool in ("Read", "Grep", "Glob"):
         return "lendo"
     if tool in ("Agent", "Task"):
@@ -550,6 +556,23 @@ def cmd_rotulo(d, root):
                                              "updatedInput": new}}, ensure_ascii=False))
 
 
+FILLER = re.compile(r"^(por favor|pf|agora|então|entao|ok|beleza|blz|show|certo|bom|olá|ola|oi)[,.!: ]+", re.I)
+
+
+def resumo(text, n=60):
+    """Primeira frase do pedido, sem cortesia, cortada em palavra inteira."""
+    t = re.sub(r"\s+", " ", text).strip()
+    while True:
+        u = FILLER.sub("", t)
+        if u == t:
+            break
+        t = u
+    t = re.split(r"(?<=[.!?;])\s", t, maxsplit=1)[0].rstrip(".!;")
+    if len(t) > n:
+        t = t[:n].rsplit(" ", 1)[0]
+    return t[:1].upper() + t[1:]
+
+
 # ---------- comandos ----------
 
 def cmd_status(d, root):
@@ -579,12 +602,19 @@ def _status(d, root, sd, path):
     touched = None
     # SubagentStop perdido não deixa agente fantasma: some depois de 30 minutos.
     st["agents"] = {k: v for k, v in st["agents"].items() if time.time() - v.get("t", 0) < 1800}
+    if ev in ("SubagentStart", "SubagentStop"):
+        # Registro curto para diagnosticar subagente que não aparece (só nomes de campo e ids).
+        with open(os.path.join(sd, "status", "agentes.log"), "a", encoding="utf-8") as fh:
+            fh.write(json.dumps({"ev": ev, "sid": d.get("session_id"), "agent_id": d.get("agent_id"),
+                                 "agent_type": d.get("agent_type"), "campos": sorted(d.keys())},
+                                ensure_ascii=False) + "\n")
     if ev == "UserPromptSubmit":
         st["turno"] = int(st.get("turno") or 0) + 1
         prompt = d.get("prompt") if isinstance(d.get("prompt"), str) else ""
         first = next((l.strip() for l in prompt.splitlines() if l.strip()), "")
-        if first:
-            st["pedido"] = re.sub(r"\s+", " ", first)[:200]
+        # Aviso do sistema (<task-notification>, <system-reminder>) não é pedido do usuário.
+        if first and not first.startswith("<"):
+            st["pedido"] = resumo(first)
             st["acao"] = None
     elif tool in ("Agent", "Task") and ev == "PostToolUse":
         resp = d.get("tool_response")

@@ -222,5 +222,12 @@ echo '{"session_id":"S5","hook_event_name":"UserPromptSubmit","prompt":"corrige 
 chk "$(echo '{"session_id":"S5","model":{}}' | /bin/bash .claude/hooks/statusline.sh | sed 's/\x1b\[[0-9;]*m//g' | sed -n 2p | grep -c 'corrige o bug')" 1 "statusline: sem plano mostra o pedido"
 for f in a b c d e f; do echo "{\"session_id\":\"S5\",\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"src/$f.ts\"}}" | PV ritmo; done > ritmo.out
 chk "$(grep -c Ritmo ritmo.out)" 1 "ritmo: funciona sem prompt_id"; rm -f ritmo.out
+U() { python3 -c 'import json,sys;print(json.dumps({"session_id":"S6","hook_event_name":"UserPromptSubmit","prompt":sys.argv[1]}))' "$1" | PV status; python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["pedido"])' "$(git rev-parse --git-path prevec)/status/S6.json"; }
+chk "$(U 'blz, agora corrige o login quebrado. Depois roda os testes')" "Corrige o login quebrado" "pedido: primeira frase sem cortesia"
+chk "$(U '<task-notification> agente terminou')" "Corrige o login quebrado" "pedido: aviso do sistema não substitui"
+mv .context/planos /tmp/planos.$$
+echo '{"session_id":"S6","tool_name":"Bash","tool_input":{"command":"bash scripts/deploy.sh --x"}}' | PV pre
+chk "$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["acao"])' "$(git rev-parse --git-path prevec)/status/S6.json")" "rodando bash deploy.sh" "pre: sem pasta de planos grava a ação com o nome do script"
+mv /tmp/planos.$$ .context/planos
 echo "== $((n-fails))/$n passaram (V10)"
 [ "$fails" -eq 0 ]
