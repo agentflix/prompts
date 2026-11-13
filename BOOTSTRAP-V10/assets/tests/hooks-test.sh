@@ -219,7 +219,7 @@ chk "$(echo "$sl" | grep -c 'T2 Outra.*editando nao.ts')" 1 "statusline: task in
 chk "$(echo '{"session_id":"S3","tool_name":"Edit","tool_input":{"file_path":"src/fora.ts"}}' | PV pre | grep -c 'fora da seção A de T2')" 1 "pre: escopo só com as tasks da sessão"
 chk "$(echo '{"session_id":"S4","tool_name":"Edit","tool_input":{"file_path":"src/fora.ts"}}' | PV pre | wc -c | tr -d ' ')" 0 "pre: outra sessão sem task não recebe aviso"
 echo '{"session_id":"S5","hook_event_name":"UserPromptSubmit","prompt":"corrige o bug do login\nmais texto"}' | PV status
-chk "$(echo '{"session_id":"S5","model":{}}' | /bin/bash .claude/hooks/statusline.sh | sed 's/\x1b\[[0-9;]*m//g' | sed -n 2p | grep -c 'corrige o bug')" 1 "statusline: sem plano mostra o pedido"
+chk "$(echo '{"session_id":"S5","model":{}}' | /bin/bash .claude/hooks/statusline.sh | sed 's/\x1b\[[0-9;]*m//g' | sed -n 2p | grep -ci 'corrige o bug')" 1 "statusline: sem plano mostra o pedido"
 for f in a b c d e f; do echo "{\"session_id\":\"S5\",\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"src/$f.ts\"}}" | PV ritmo; done > ritmo.out
 chk "$(grep -c Ritmo ritmo.out)" 1 "ritmo: funciona sem prompt_id"; rm -f ritmo.out
 U() { python3 -c 'import json,sys;print(json.dumps({"session_id":"S6","hook_event_name":"UserPromptSubmit","prompt":sys.argv[1]}))' "$1" | PV status; python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["pedido"])' "$(git rev-parse --git-path prevec)/status/S6.json"; }
