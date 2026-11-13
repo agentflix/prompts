@@ -28,5 +28,5 @@ O `GATE_FULL` inteiro. Em monorepo ele encadeia os deployables; não rode só o 
 |---|---|
 | workflow / processo | `.claude/skills/ship/SKILL.md` |
 | regras do projeto | `.claude/rules/*.md` da área tocada, citando o ID (A2, D1…) |
-| critério de aceite | **Pronto quando** e C de `.context/planos/<feature>.md`, ou o pedido original |
+| critério de aceite | **Pronto quando** e C de `.context/planos/NNNNN-<feature>.md`, ou o pedido original |
 | decisões | `.context/decisions/` |

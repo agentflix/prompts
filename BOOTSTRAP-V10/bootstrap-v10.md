@@ -74,7 +74,7 @@ Vale para qualquer `.context/` ou documentação de IA que já exista: V8, V7.1,
    | Regra verificável (faça ou não faça) | `.claude/rules/<área>.md`, com `paths:`. Regra escrita à mão mantém a redação, exceto CAPS: troque a ênfase pelo motivo. Área que o wizard não ativou: crie o arquivo dessa área só com as regras migradas e avise o usuário |
    | Comando de build, teste ou lint | `.claude/hooks/gates.conf` |
    | Decisão com motivo (ADR) | `.context/decisions/NNNN-slug.md`, em sequência na ordem cronológica |
-   | Plano ou feature em andamento | `.context/planos/<feature>.md` no formato da skill `plano`, com `status: em-execucao`: o que está feito vira task `✅`, o que falta vira task `⬜` com A, C e E. Rode `prevec.sh plano` nele |
+   | Plano ou feature em andamento | `.context/planos/NNNNN-<feature>.md` no formato da skill `plano` (numere em sequência a partir de `00001`, na ordem de início), com `status: em-execucao`: o que está feito vira task `✅`, o que falta vira task `⬜` com A, C e E. Rode `prevec.sh plano` nele |
    | Fato não óbvio (armadilha, convenção fora do padrão) | Seção "Não óbvio" do `AGENTS.md` |
    | Visão geral, árvore de pastas, descrição da stack, metodologia, formato de resposta, plano concluído, changelog | Arquivo morto |
 
@@ -88,7 +88,7 @@ Mapa direto do V9:
 
 | V9 | V10 |
 |---|---|
-| `.context/specs/<f>/SPEC.md` em andamento | `.context/planos/<f>.md`: critérios viram **Pronto quando**, a seção Plano vira tasks T.A.C.E |
+| `.context/specs/<f>/SPEC.md` em andamento | `.context/planos/NNNNN-<f>.md`: critérios viram **Pronto quando**, a seção Plano vira tasks T.A.C.E |
 | `features.json` · `progress.md` | Saem. O estado mora no plano (marcado por hook a partir das tarefas nativas) |
 | `.claude/skills/spec` | Sai. A skill `plano` cobre, com "testes primeiro" |
 | `.claude/hooks/*` | Substitua pelos do V10 e mescle o `gates.conf`: as variáveis novas (`TQ_*`, `ESCOPO`, `RITMO_*`, `STATUS_TASK_MAX`) entram com o padrão; as antigas mantêm o valor |
@@ -101,7 +101,7 @@ Mapa direto do V8:
 | `.context/arch/rules.md` | Divida por área em `.claude/rules/{codigo,testes,api,dados,ui}.md`, com `paths:`. Regra escrita à mão vai junto e mantém a redação, exceto CAPS |
 | `.context/arch/gates.md` | Os comandos vão para `.claude/hooks/gates.conf` |
 | `.context/arch/decisions/` | `.context/decisions/` |
-| `.context/work/<feature>.md` em andamento | `.context/planos/<feature>.md`. As tasks T.A.C.E do V8 já estão quase no formato: ajuste o título (`### T1 — … · depende: … · estado: ⬜`) e troque `WHEN/SHALL` por `QUANDO/DEVE` só se quiser; o checador aceita os dois |
+| `.context/work/<feature>.md` em andamento | `.context/planos/NNNNN-<feature>.md`. As tasks T.A.C.E do V8 já estão quase no formato: ajuste o título (`### T1 — … · depende: … · estado: ⬜`) e troque `WHEN/SHALL` por `QUANDO/DEVE` só se quiser; o checador aceita os dois |
 | `overview.md` · `modules.yaml` · `flows.md` | Fato não óbvio vai para "Não óbvio" do `AGENTS.md`. Restrição de import vira regra de lint se o usuário quiser. O resto sai |
 | `.context/PREVEC.md` · `.context/formats/` | Saem. A metodologia fica neste bootstrap, não no projeto |
 | `.claude/agents/{PLANNER,BUILDER,REVIEWER}.md` · `.codex/agents/*` | Saem. O revisor substitui o REVIEWER |
