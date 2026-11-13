@@ -12,7 +12,7 @@ Na raiz do projeto:
 Leia e execute BOOTSTRAP-V10/bootstrap-v10.md
 ```
 
-Wizard em caixas de opção (até quatro chamadas). Auditoria depois: `bash BOOTSTRAP-V10/assets/doctor.sh`. Teste do kit: `bash BOOTSTRAP-V10/assets/tests/hooks-test.sh` (82 casos).
+Wizard em caixas de opção (até quatro chamadas). Auditoria depois: `bash BOOTSTRAP-V10/assets/doctor.sh`. Teste do kit: `bash BOOTSTRAP-V10/assets/tests/hooks-test.sh` (84 casos).
 
 ## O fluxo
 
@@ -49,7 +49,7 @@ Opus na conversa principal planeja, integra e revisa. Código delegado sai em So
 
 - Por task: só o teste afetado (campo E). Fim de turno: `GATE_FAST` por hook, com `{changed}`.
 - `GATE_FULL`: só no fim da fase e no `ship`, uma vez. O revisor recebe a saída e não roda de novo.
-- **Fila `tq`**: uma suíte pesada por repositório por vez, valendo entre sessões, subagentes e worktrees. FIFO por ticket com `flock` (python3, macOS e Linux, sem daemon). Dono morto (crash, `kill -9`) não prende a fila. Quem espera não gasta token: o processo dorme e imprime "posição 2 de 3". O hook `fila.sh` manda o `GATE_FULL` e os comandos de `TQ_MATCH` para a fila; teste de um arquivo passa direto. Suíte longa roda em background e a notificação chega no fim.
+- **Fila `tq`**: uma suíte pesada por repositório por vez, valendo entre sessões, subagentes e worktrees. FIFO por ticket com `flock` (python3, macOS e Linux, sem daemon). Dono morto (crash, `kill -9`) não prende a fila. Quem espera não gasta token: o processo dorme e imprime "posição 2 de 3". O hook `fila.sh` reescreve o `GATE_FULL` e os comandos de `TQ_MATCH` para passar pela fila (`updatedInput`): o agente pede o comando normal e ele espera a vez sozinho, sem turno extra. Teste de um arquivo passa direto. Validado numa sessão real do Claude Code: com a fila ocupada, a suíte do agente esperou (`posição 2 de 2`) e rodou em seguida. Suíte longa roda em background e a notificação chega no fim.
 - Por que não cron a cada 30 s: cada consulta seria um turno do modelo. Na fila, a espera é do processo, e a ordem é justa (`flock` sozinho não garante ordem).
 
 ## Statusline

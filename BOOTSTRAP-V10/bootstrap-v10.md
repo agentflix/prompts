@@ -131,7 +131,7 @@ Antes de apagar qualquer arquivo, mostre a lista completa e espere o usuário co
 
 Ajustes no `AGENTS.md` conforme o que não foi instalado:
 - sem gate: na seção "Testes e verificação", tire a frase "No Claude Code e no Codex o hook roda o `GATE_FAST` no fim do turno" e escreva "Rode o `GATE_FAST` antes de encerrar um turno com mudança";
-- sem fila: tire "sempre pela fila" e o comando do `tq.sh`;
+- sem fila: tire a frase da fila e o comando do `tq.sh`;
 - sem `revisor`: na lista "Delegue" e na linha de área de risco, troque `revisor` por `/code-review` (Claude Code) ou `/review` (Codex);
 - sem subagentes: a seção Orquestração vira uma linha ("Faça você mesmo; leitura grande vai para o Explore embutido");
 - sem `testes.md`, sai a linha que manda lê-lo;
@@ -192,7 +192,7 @@ Regra que dá para garantir por máquina não fica só no texto. Se o projeto te
    - desfaça a mudança.
    Se só uma parte do gate está vermelha antes de qualquer mudança (um alvo de teste entre vários), monte o `GATE_FAST` só com as partes verdes e registre a vermelha como pendência, com o comando e o número de falhas. Se tudo está vermelho, ponha `GATE_ON_STOP=0` no `gates.conf` e registre como pendência. Assim o hook não prende o agente consertando código que não é dele. Religue quando o gate ficar verde.
 3. Teste o guard: `echo '{"tool_input":{"file_path":".env"}}' | .claude/hooks/guard.sh; echo "exit $?"` deve sair com 2.
-4. Teste a fila, se instalada: `echo '{"tool_input":{"command":"<um comando de TQ_MATCH>"}}' | .claude/hooks/fila.sh; echo "exit $?"` deve sair com 2 e mostrar o comando pelo `tq.sh`; `.claude/hooks/tq.sh 'echo ok'` deve imprimir `ok`.
+4. Teste a fila, se instalada: `echo '{"tool_input":{"command":"<um comando de TQ_MATCH>"}}' | .claude/hooks/fila.sh; echo "exit $?"` deve imprimir um JSON com `updatedInput` cujo `command` começa pelo caminho do `tq.sh`; `.claude/hooks/tq.sh 'echo ok'` deve imprimir `ok`.
 5. Teste o checador de plano: `.claude/hooks/prevec.sh plano .claude/skills/plano/references/plano.template.md` deve listar problemas (o molde tem placeholders); isso prova que ele roda.
 
 Relate em até 15 linhas:

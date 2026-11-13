@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # PreToolUse em Bash. Suíte pesada (GATE_FULL ou padrão de TQ_MATCH) só roda pela fila tq,
 # para dois agentes não rodarem a suíte ao mesmo tempo e travarem a máquina.
-# Bloqueia uma vez (exit 2) com o comando exato a usar. Não espera aqui: esperar no hook
-# prenderia o turno e o timeout do hook; a espera acontece dentro do tq, sem gastar token.
+# Reescreve o comando para .claude/hooks/tq.sh '<comando>' (updatedInput), sem perder turno.
+# Não espera aqui: esperar no hook prenderia o turno e o timeout do hook; a espera acontece
+# dentro do tq, sem gastar token.
 set -u
 . "$(dirname "$0")/_lib.sh"
 py_ok || exit 0
@@ -81,11 +82,26 @@ for seg in segments(sys.argv[1]):
 ' "$cmd" "${GATE_FULL:-}" "${TQ_MATCH:-}")"
 [ -n "$hit" ] || exit 0
 
-q=$(printf '%s' "$cmd" | sed "s/'/'\\\\''/g")
-{
-  echo "Suíte pesada ($hit) roda pela fila de testes deste repositório, uma por vez."
-  echo "Rode exatamente: .claude/hooks/tq.sh '$q'"
-  echo "Passe timeout 600000 no Bash (o padrão é 2 minutos e mataria a suíte). Se a espera mais a suíte pode passar de 10 minutos, rode com run_in_background e siga quando a notificação chegar. Não rode a suíte de novo enquanto espera."
-  echo "Durante uma tarefa, rode só o teste afetado (campo E da task); a suíte inteira fica para o fim da fase e o ship."
-} >&2
-exit 2
+# Reescreve o comando para passar pela fila (updatedInput): o agente não perde turno.
+# A reescrita exige permissionDecision "allow"; o comando é o mesmo que o agente pediu.
+# Foreground ganha timeout de 10 minutos (o padrão de 2 mataria a suíte na espera).
+py -c '
+import json, shlex, sys
+d = json.loads(sys.argv[1] or "{}")
+ti = dict(d.get("tool_input") or {})
+tq = sys.argv[2] + "/.claude/hooks/tq.sh"
+ti["command"] = shlex.quote(tq) + " " + shlex.quote(ti.get("command") or "")
+if not ti.get("run_in_background"):
+    try:
+        cur = int(ti.get("timeout") or 0)
+    except (TypeError, ValueError):
+        cur = 0
+    ti["timeout"] = max(cur, 600000)
+msg = ("Suíte pesada (" + sys.argv[3] + ") rodando pela fila de testes: uma por vez neste repositório. "
+       "Se a fila estiver ocupada, o comando espera a vez sozinho; não rode a suíte de novo. "
+       "Durante uma task, rode só o teste afetado.")
+print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow",
+                  "permissionDecisionReason": msg, "updatedInput": ti, "additionalContext": msg}},
+                 ensure_ascii=False))
+' "$INPUT" "$ROOT" "$hit"
+exit 0

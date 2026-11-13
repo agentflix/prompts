@@ -26,7 +26,7 @@ Trabalho manual que você repetiu pela terceira vez (a mesma sequência de coman
 
 Comandos em `.claude/hooks/gates.conf`.
 - Por task ou fix: só o teste afetado (o campo **E** da task). No Claude Code e no Codex o hook roda o `GATE_FAST` no fim do turno.
-- `GATE_FULL`: só no fim de cada fase e no `ship`, sempre pela fila: `.claude/hooks/tq.sh "<comando>"`. A fila deixa uma suíte por vez neste repositório. Passe `timeout: 600000` no Bash; se pode passar de 10 minutos, rode em background e espere a notificação.
+- `GATE_FULL`: só no fim de cada fase e no `ship`. Roda pela fila (uma suíte por vez neste repositório): no Claude Code o hook põe o comando na fila sozinho; nas outras ferramentas, use `.claude/hooks/tq.sh "<comando>"`. Se pode passar de 10 minutos, rode em background e espere a notificação.
 - Antes de escrever teste, leia `.claude/rules/testes.md`. Teste existente que parece errado: pare e diga por quê, não edite para passar.
 
 ## Orquestração

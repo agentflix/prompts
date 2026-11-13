@@ -125,13 +125,16 @@ RITMO_EDITS=2
 RITMO_READS=3
 STATUS_TASK_MAX=20
 EOF2
-F() { python3 -c 'import json,sys;print(json.dumps({"tool_input":{"command":sys.argv[1]}}))' "$1" | /bin/bash .claude/hooks/fila.sh >/dev/null 2>&1; echo $?; }
+F() { python3 -c 'import json,sys;print(json.dumps({"tool_input":{"command":sys.argv[1]}}))' "$1" | /bin/bash .claude/hooks/fila.sh 2>/dev/null | grep -q updatedInput && echo 2 || echo 0; }
 chk "$(F 'cd x && npm test && npm run build')" 2 "fila: GATE_FULL vai pela fila"
 chk "$(F 'pytest -x -q')" 2 "fila: suíte com flags vai pela fila"
 chk "$(F 'FOO=1 pytest')" 2 "fila: variável na frente não escapa"
 chk "$(F 'npx vitest run src/a.test.ts')" 0 "fila: teste de um arquivo não espera"
 chk "$(F "./.claude/hooks/tq.sh 'pytest'")" 0 "fila: comando já pela fila passa"
 chk "$(F 'npx tsc --noEmit')" 0 "fila: comando comum passa"
+fo=$(python3 -c 'import json;print(json.dumps({"tool_input":{"command":"npm test && npm run build","description":"d"}}))' | /bin/bash .claude/hooks/fila.sh)
+chk "$(echo "$fo" | python3 -c 'import json,sys;t=json.load(sys.stdin)["hookSpecificOutput"]["updatedInput"];print("tq.sh" in t["command"] and t["command"].endswith(" '"'"'npm test && npm run build'"'"'"), t["timeout"], t["description"])')" "True 600000 d" "fila: reescreve pelo tq com timeout e mantém os campos"
+chk "$(bash -c "$(echo "$fo" | python3 -c 'import json,sys;print(json.load(sys.stdin)["hookSpecificOutput"]["updatedInput"]["command"].replace("npm test && npm run build","echo pela-fila"))')" 2>/dev/null)" pela-fila "fila: comando reescrito roda"
 rm -f order.log
 for i in 1 2 3; do (.claude/hooks/tq.sh "echo s$i >> order.log; sleep 1; echo e$i >> order.log" 2>/dev/null &); sleep 0.8; done
 sleep 4; chk "$(tr '\n' ' ' < order.log)" "s1 e1 s2 e2 s3 e3 " "tq: FIFO sem sobreposição"
